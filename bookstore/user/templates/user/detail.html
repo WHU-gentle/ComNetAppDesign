@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+
+    {% if error_message %}
+        <p><strong>{{ error_message }}</strong></p> <br>
+        <a href="{% url 'user:login' %}">返回</a>
+    {% else %}
+        用户名：{{ user.user_name }} <br>
+        电话：{{ user.phone_number }} <br>
+        地址：{{ user.address }} <br>
+    {% endif %}
+
+
+    <!--
+    <ul>
+        {% for choice in question.choice_set.all %}
+            <li>{{ choice.choice_text }}</li>
+        {% endfor %}
+    </ul>
+    -->
+</body>
+</html>
