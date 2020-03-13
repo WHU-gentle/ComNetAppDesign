@@ -3,36 +3,39 @@
 
 import smtplib
 from email.mime.text import MIMEText
-from email.header import Header
-
-# 第三方 SMTP 服务
-# 设置服务器
-mail_host = "smtp.qq.com"
-# 用户名（实际发送）
-mail_user = "875577407@qq.com"
-# 口令
-mail_pass = "iedfqlvhmxdzbahi"
-# 代发
-sender = 'yusitong1999@foxmail.com'
-# 接收邮件，可设置为你的QQ邮箱或者其他邮箱
-receivers = ['875577407@qq.com']
-
-# 邮件内容
-message = MIMEText('Python 邮件发送测试...', 'plain', 'utf-8')
-# 发送人
-message['From'] = Header(mail_user, 'utf-8')
-# 收件人
-# message['To'] = Header("书店顾客<" + receivers[0] + ">", 'utf-8')
-
-# 标题
-subject = 'Python SMTP 邮件测试'
-message['Subject'] = Header(subject, 'utf-8')
+from email.utils import formataddr
 
 try:
     smtpObj = smtplib.SMTP()
-    smtpObj.connect(mail_host, 25)  # 25 为 SMTP 端口号
-    smtpObj.login(mail_user, mail_pass)
-    smtpObj.sendmail(sender, receivers, message.as_string())
+    # 设置服务器
+    mail_host = "smtp.qq.com"
+    server = smtplib.SMTP_SSL("smtp.qq.com", 465)  # 25 为 SMTP 端口号
+
+    # 登录服务器
+    # 用户名
+    mail_user = "875577407@qq.com"
+    # 口令
+    mail_pass = "iedfqlvhmxdzbahi"
+    server.login(mail_user, mail_pass)
+
+    # 发送邮件
+    # 代发
+    # sender = 'yusitong1999@foxmail.com'
+    sender = mail_user
+    # 接收邮件，可设置为你的QQ邮箱或者其他邮箱
+    # receivers = ['875577407@qq.com']
+    receivers = ['13503202005@163.com']
+
+    # 邮件内容
+    message = MIMEText('Python 邮件发送测试...', 'plain', 'utf-8')
+    # 发送人
+    message['From'] = formataddr(["珞珈网上书店", sender])
+    # 收件人
+    message['To'] = formataddr(["书店用户", receivers[0]])
+    # 标题
+    message['Subject'] = 'Python SMTP 邮件测试'
+    server.sendmail(sender, receivers, message.as_string())
+    server.quit()
     print("邮件发送成功")
-except smtplib.SMTPException:
+except Exception:
     print("Error: 无法发送邮件")
