@@ -122,3 +122,14 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/3.0/howto/static-files/
 
 STATIC_URL = '/static/'
+STATICFILES_DIRS = [
+    os.path.join(BASE_DIR, 'static')
+]
+
+# 会话设置
+# 缓存并写到数据库
+SESSION_ENGINE = 'django.contrib.sessions.backends.cached_db'
+# 每次会话缓存
+SESSION_SAVE_EVERY_REQUEST = True
+# 默认：关闭浏览器后仍有效
+# SESSION_EXPIRE_AT_BROWSER_CLOSE = True

@@ -1,10 +1,10 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
-<body>
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}珞珈线上书店-首页{% endblock title %}
+{% block topfiles %}
+{% endblock topfiles %}
+{% block body %}
+
     <form action="{% url 'user:detail' %}" method="post">
         {% csrf_token %}
         用户名：<input type="text" name="user_name"> <br>
@@ -13,5 +13,4 @@
         <input type="submit" value="登录"> <br>
     </form>
     <a href="{% url 'user:register' %}">注册</a>
-</body>
-</html>
+{% endblock body %}

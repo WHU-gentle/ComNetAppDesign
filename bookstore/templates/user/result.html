@@ -1,11 +1,9 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
-<body>
-
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}珞珈线上书店-首页{% endblock title %}
+{% block topfiles %}
+{% endblock topfiles %}
+{% block body %}
     {% if error_message %}
         <p><strong>{{ error_message }}</strong></p>
     {% else %}
@@ -13,5 +11,4 @@
         欢迎！{{ user_name }} <br>
         <a href="{% url 'user:login' %}">登录</a>
     {% endif %}
-</body>
-</html>
+{% endblock body %}
