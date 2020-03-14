@@ -5,8 +5,7 @@ import random
 import os
 
 # 定义变量，用于画面的背景色、宽、高
-bgcolor = (random.randrange(20, 100), random.randrange(
-    20, 100), 255)
+bgcolor = (random.randrange(20, 100), random.randrange(20, 100), 255)
 width = 100
 height = 25
 # 创建画面对象
@@ -19,14 +18,15 @@ for i in range(0, 100):
     fill = (random.randrange(0, 255), 255, random.randrange(0, 255))
     draw.point(xy, fill=fill)
 # 定义验证码的备选值
-str1 = 'ABCD123EFGHIJK456LMNOPQRS789TUVWXYZ0'
+# 除去大写I 小写L 字母O 数字0 1
+str1 = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'
 # 随机选取4个值作为验证码
 rand_str = ''
 for i in range(0, 4):
     rand_str += str1[random.randrange(0, len(str1))]
 # 构造字体对象
 # font = ImageFont.truetype(os.path.join(settings.BASE_DIR, "Ubuntu-RI.ttf"), 15)
-font = ImageFont.truetype("Ubuntu-RI.ttf", 15)
+font = ImageFont.truetype("courbd.ttf", 15)
 
 # 构造字体颜色
 fontcolor = (255, random.randrange(0, 255), random.randrange(0, 255))
