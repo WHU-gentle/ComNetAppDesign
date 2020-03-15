@@ -1,6 +1,6 @@
 
 from django.shortcuts import render, redirect, reverse
-from django.http import Http404
+from django.http import Http404, HttpResponse, JsonResponse
 
 from .models import User
 
@@ -9,38 +9,79 @@ from .models import User
 
 
 def login(request):
-    return render(request, 'user/login.html')
+    '''显示登录页面'''
+    if request.COOKIES.get("user_name"):
+        user_name = request.COOKIES.get("user_name")
+        checked = 'checked'
+    else:
+        user_name = ''
+        checked = ''
+    context = {
+        'user_name': user_name,
+        'checked': checked,
+    }
+    return render(request, 'user/login.html', context)
+
+
+def login_check(request):
+    '''进行用户登录校验'''
+    # 1.获取数据
+    user_name = request.POST.get('user_name')
+    password = request.POST.get('password')
+    remember = request.POST.get('remember')
+    verifycode = request.POST.get('verifycode')
+
+    # 2.数据校验
+    if not all([user_name, password, remember, verifycode]):
+        # 有数据为空
+        return JsonResponse({'res': 1, 'errmsg': '不能为空'})
+
+    if verifycode.upper() != request.session['verifycode'].upper():
+        return JsonResponse({'res': 1, 'errmsg': '验证码错误'})
+
+    # 3.进行处理:根据用户名和密码查找账户信息
+    try:
+        user = User.objects.get(pk=request.POST['user_name'])
+    except User.DoesNotExist:
+        return JsonResponse({'res': 1, 'errmsg': '用户不存在'})
+    else:
+        if user.password != request.POST['password']:
+            return JsonResponse({'res': 1, 'errmsg': '密码错误'})
+    print('ok')
+    next_url = reverse('index')
+    jres = JsonResponse({'res': 0, 'next_url': next_url})
+
+    # 判断是否需要记住用户名
+    if remember == 'true':
+        # 记住用户名
+        jres.set_cookie('user_name', user_name, max_age=7 * 24 * 3600)
+    else:
+        # 不要记住用户名
+        jres.delete_cookie('user_name')
+
+    # 记住用户的登录状态
+    request.session['islogin'] = True
+    request.session['user'] = {
+        'user_name': user.user_name,
+        'phone_number': user.phone_number,
+        'address': user.address,
+    }
+    cache_clean()
+    return jres
 
 
 def detail(request):
-    if not request.session.get('islogin', False):
-        if request.method == 'POST':
-            try:
-                user = User.objects.get(pk=request.POST['user_name'])
-            except User.DoesNotExist:
-                return render(request, 'user/detail.html', {'error_message': '用户不存在'})
-            else:
-                # print(user.password)
-                # print(request.POST['password'])
-                if user.password != request.POST['password']:
-                    return render(request, 'user/detail.html', {'error_message': '密码错误'})
-            request.session['islogin'] = True
-            request.session['user'] = {
-                'user_name': user.user_name,
-                'phone_number': user.phone_number,
-                'address': user.address,
+    if request.session.get('islogin', False):
+        context = {
+            'user': {
+                'user_name': request.session['user']['user_name'],
+                'phone_number': request.session['user']['phone_number'],
+                'address': request.session['user']['address'],
             }
-        else:
-            return render(request, 'user/detail.html', {'error_message': '未登录'})
-    context = {
-        'user': {
-            'user_name': request.session['user']['user_name'],
-            'phone_number': request.session['user']['phone_number'],
-            'address': request.session['user']['address'],
         }
-    }
-
-    return render(request, 'user/detail.html', context)
+        return render(request, 'user/detail.html', context)
+    else:
+        raise Http404
 
 
 def cache_clean():
@@ -74,3 +115,58 @@ def cart(request):
 
 def order(request):
     return render(request, 'user/order.html')
+
+
+# 引入绘图模块
+from PIL import Image, ImageDraw, ImageFont
+# 引入随机函数模块
+import random
+# 内存文件操作
+import io
+
+
+def verifycode(request):
+    # 定义变量，用于画面的背景色、宽、高
+    bgcolor = (random.randrange(20, 100), random.randrange(20, 100), 255)
+    width = 100
+    height = 25
+    # 创建画面对象
+    im = Image.new('RGB', (width, height), bgcolor)
+    # 创建画笔对象
+    draw = ImageDraw.Draw(im)
+    # 调用画笔的point()函数绘制噪点
+    for i in range(0, 100):
+        xy = (random.randrange(0, width), random.randrange(0, height))
+        fill = (random.randrange(0, 255), 255, random.randrange(0, 255))
+        draw.point(xy, fill=fill)
+    # 定义验证码的备选值
+    # 除去大写I 小写L 字母O 数字0 1
+    str1 = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'
+    # 随机选取4个值作为验证码
+    rand_str = ''
+    for i in range(0, 4):
+        rand_str += str1[random.randrange(0, len(str1))]
+    # 构造字体对象
+    # font = ImageFont.truetype(os.path.join(settings.BASE_DIR, "Ubuntu-RI.ttf"), 15)
+    font = ImageFont.truetype("courbd.ttf", 15)
+
+    # 构造字体颜色
+    fontcolor = (255, random.randrange(0, 255), random.randrange(0, 255))
+    # 绘制4个字
+    draw.text((5, 2), rand_str[0], font=font, fill=fontcolor)
+    draw.text((25, 2), rand_str[1], font=font, fill=fontcolor)
+    draw.text((50, 2), rand_str[2], font=font, fill=fontcolor)
+    draw.text((75, 2), rand_str[3], font=font, fill=fontcolor)
+    # 释放画笔
+    del draw
+    # 存入session，用于做进一步验证
+    request.session['verifycode'] = rand_str
+    print(rand_str)
+
+    buf = io.BytesIO()
+    # 将图片保存在内存中，文件类型为png
+    im.save(buf, 'png')
+    # 将内存中的图片数据返回给客户端，MIME类型为图片png
+    return HttpResponse(buf.getvalue(), 'image/png')
+    # with open('tmp.png', 'wb') as f:
+    #     f.write(buf.getvalue())
