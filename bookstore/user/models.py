@@ -13,3 +13,4 @@ class User(models.Model):
     password = models.CharField(max_length=16)
     phone_number = models.CharField(max_length=20)
     address = models.CharField(max_length=100)
+    email = models.CharField(max_length=50)
