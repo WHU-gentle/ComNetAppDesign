@@ -16,5 +16,13 @@ class User(models.Model):
     phone_number = models.CharField(max_length=20)  # +86 0311 86012345
     address = models.CharField(max_length=100)
     email = models.CharField(max_length=50, unique=True)
+    register_date = models.DateField()
 
 
+class Cart(models.Model):
+    def __str__(self):
+        return str(self.user_id) + '的购物车'
+    user_id = models.IntegerField(primary_key = True)
+    book_id = models.IntegerField()
+    number = models.IntegerField(default=1)
+    price = models.FloatField()
