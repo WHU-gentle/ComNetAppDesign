@@ -1,0 +1,6 @@
+.idea
+*.sqlite3
+__pycache__
+tmp.png
+environment
+

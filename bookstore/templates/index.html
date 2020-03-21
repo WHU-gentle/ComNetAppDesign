@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}珞珈线上书店-首页{% endblock title %}
+{% block topfiles %}
+{% endblock topfiles %}
+{% block body %}
+    <ul>
+        <li>
+            <a href="{% url 'user:login' %}">登录</a>
+        </li>
+        <li>
+            <a href="{% url 'user:register' %}">注册</a>
+        </li>
+    </ul>
+{% endblock body %}
