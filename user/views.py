@@ -62,6 +62,7 @@ def login_check(request):
     # 记住用户的登录状态
     request.session['islogin'] = True
     request.session['user'] = {
+        'user_id': user.user_id,
         'user_name': user.user_name,
         'phone_number': user.phone_number,
         'address': user.address,
