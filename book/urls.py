@@ -13,4 +13,6 @@ urlpatterns = [
     path('search?<str:keyword>/', views.search, name='search'),
     # 加入购物车
     path('buy/', views.buy, name='buy'),
+    # 移出购物车
+    path('cancel/', views.cancel, name='cancel'),
 ]
