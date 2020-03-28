@@ -15,8 +15,8 @@ class Order(models.Model):
     # 订单状态：已取消 0， 待付款 1， 待发货 2， 已发货 3， 已完成 4
     status = models.IntegerField()  # TODO IntegerField ?
     time_submit = models.DateTimeField()
-    time_pay = models.DateTimeField()
-    time_finish = models.DateTimeField()
+    time_pay = models.DateTimeField(null=True)
+    time_finish = models.DateTimeField(null=True)
 
 
 class OrderContent(models.Model):
