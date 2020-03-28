@@ -4,6 +4,7 @@ from django.http import Http404, HttpResponse, JsonResponse
 
 from .models import User
 
+import datetime
 
 # Create your views here.
 
@@ -41,7 +42,7 @@ def login_check(request):
 
     # 3.进行处理:根据用户名和密码查找账户信息
     try:
-        user = User.objects.get(pk=request.POST['user_name'])
+        user = User.objects.get(user_name=request.POST['user_name'])
     except User.DoesNotExist:
         return JsonResponse({'res': 0, 'errmsg': '用户不存在'})
     else:
@@ -67,6 +68,7 @@ def login_check(request):
         'phone_number': user.phone_number,
         'address': user.address,
         'email': user.email,
+        'register_date': user.register_date.strftime("%Y-%m-%d %H:%M:%S"),
     }
     cache_clean()
     return jres
@@ -80,6 +82,7 @@ def detail(request):
                 'phone_number': request.session['user']['phone_number'],
                 'address': request.session['user']['address'],
                 'email': request.session['user']['email'],
+                'register_date': request.session['user']['register_date'],
             }
         }
         return render(request, 'user/detail.html', context)
@@ -110,7 +113,7 @@ def result(request):
             return render(request, 'user/result.html', {'error_message': '两次输入密码不一致！'})
         user = User(user_name=request.POST['user_name'], password=request.POST['password'],
                     phone_number=request.POST['phone_number'], address=request.POST['address'],
-                    email=request.POST['email'], )
+                    email=request.POST['email'], register_date=datetime.datetime.now())
         user.save()
         return render(request, 'user/result.html', {'message': '注册成功！', 'user_name': request.POST['user_name']})
 
@@ -186,49 +189,35 @@ import time
 import re
 
 
+from django.conf import settings
+from django.core.mail import EmailMultiAlternatives
+
+
 def verifyemail(request):
     email = request.POST.get('email')
     if not re.match(r'^[a-z0-9][\w\.\-]*@[a-z0-9\-]+(\.[a-z]{2,5}){1,2}$', email):  # TODO 电子邮箱格式
         # 邮箱不合法
         return JsonResponse({'res': 0, 'errmsg': '地址格式错误'})
+
+    # 生成验证码
+    random.seed(time.time())
+    code = '%d%d%d%d%d%d' % (random.randint(0, 9), random.randint(0, 9), random.randint(0, 9),
+                             random.randint(0, 9), random.randint(0, 9), random.randint(0, 9))
+
+    # 邮件内容
+    from_email = settings.DEFAULT_FROM_EMAIL
+    subject = '珞珈网上书店 验证码'
+    text_content = '验证码:' + code
+    html_content = '验证码<br><big><strong>' + code + '</strong></big>'
+
+
     try:
-        smtpObj = smtplib.SMTP()
-        # 设置服务器
-        mail_host = "smtp.qq.com"
-        server = smtplib.SMTP_SSL(mail_host, 465)  # 25 为 SMTP 端口号
-
-        # 登录服务器
-        # 用户名
-        mail_user = "875577407@qq.com"
-        # 口令
-        mail_pass = "iedfqlvhmxdzbahi"
-        server.login(mail_user, mail_pass)
-
-        # 发送邮件
-        # 代发
-        # sender = 'yusitong1999@foxmail.com'
-        sender = mail_user
-        # 接收邮件，可设置为你的QQ邮箱或者其他邮箱
-        # receivers = ['875577407@qq.com']
-        receivers = [email]
-
-        # 邮件内容
-        # message = MIMEText('Python 邮件发送测试...', 'plain', 'utf-8')
-        random.seed(time.time())
-        code = '%d%d%d%d%d%d' % ( random.randint(0,9), random.randint(0,9), random.randint(0,9),
-                                 random.randint(0,9), random.randint(0,9), random.randint(0,9) )
-        html = '验证码<br><big><strong>' + code + '</strong></big>'
-        message = MIMEText(html, 'html', 'utf-8')
-        # 发送人
-        message['From'] = formataddr(["珞珈网上书店", sender])
-        # 收件人
-        message['To'] = formataddr(["书店用户", receivers[0]])
-        # 标题
-        message['Subject'] = '珞珈网上书店 验证码'
-        server.sendmail(sender, receivers, message.as_string())
-        server.quit()
+        msg = EmailMultiAlternatives(subject, text_content, from_email, [email])
+        msg.attach_alternative(html_content, "text/html")
+        msg.send()
         print("邮件发送成功")
         request.session['verifyemail'] = code
         return JsonResponse({'res': 1})
     except Exception:
+        print("邮件发送失败")
         return JsonResponse({'res': 0, 'errmsg': '邮件发送失败'})
