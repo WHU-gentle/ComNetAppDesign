@@ -15,21 +15,6 @@ def detail(request, order_id):
     pass
 
 
-'''
-    order_id = models.AutoField(primary_key=True)
-    user_id = models.IntegerField()
-    sum_price = models.FloatField()
-    # 订单状态：已取消 0， 待付款 1， 待发货 2， 已发货 3， 已完成 4
-    status = models.IntegerField()  # TODO IntegerField ?
-    time_submit = models.DateTimeField()
-    time_pay = models.DateTimeField()
-    time_finish = models.DateTimeField()
-    
-    order_id = models.IntegerField()
-    book_id = models.IntegerField()
-    number = models.IntegerField()
-    price = models.FloatField()
-'''
 # 创建订单
 def new(request):
     order = Order(
@@ -59,3 +44,20 @@ def new(request):
     Cart.objects.filter(user_id=request.session['user']['user_id']).delete()
     # order.save()
     return JsonResponse({'res': 1})
+
+
+def receive(request):
+    order_id = request.GET.get('order_id')
+    try:
+        order = Order.objects.get(user_id=request.session['user']['user_id'], order_id=order_id)
+    except Order.DoesNotExist:
+        # 订单不存在
+        return JsonResponse({'res': 0, 'errmsg': '订单不存在'})
+    except Order.MultipleObjectsReturned:
+        raise Exception('订单表错误')
+    if order.status == 3:
+        order.status = 4
+        order.save()
+        return JsonResponse({'res': 1})
+    else:
+        return JsonResponse({'res': 0, 'errmsg': '订单不可收货'})
