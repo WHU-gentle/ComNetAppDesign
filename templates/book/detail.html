@@ -1,0 +1,11 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}{{ book.book_name }}{% endblock title %}
+{% block topfiles %}
+{% endblock topfiles %}
+{% block body %}
+    <div>
+        {{ book.book_name }}<br>
+        {{ book.author }}
+    </div>
+{% endblock body %}

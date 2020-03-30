@@ -1,0 +1,13 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}{{ kind_name }}{% endblock title %}
+{% block topfiles %}
+{% endblock topfiles %}
+{% block body %}
+    {% for book in books %}
+        <div>
+        {{ book.book_name }}<br>
+        {{ book.author }}
+        </div>
+    {% endfor %}
+{% endblock body %}
