@@ -17,11 +17,17 @@ from django.contrib import admin
 from django.urls import path
 from django.urls import include
 from . import views
+from django.conf.urls import url
+from django.views import static ##新增
+from django.conf import settings ##新增
 
 urlpatterns = [
     path('user/', include('user.urls')),
     path('book/', include('book.urls')),
     path('order/', include('order.urls')),
     path('admin/', admin.site.urls),
-    path('', views.index, name='index')
+    path('', views.index, name='index'),
+##　以下是新增
+  url(r'^static/(?P<path>.*)$', static.serve,
+      {'document_root': settings.STATIC_ROOT}, name='static'),
 ]
