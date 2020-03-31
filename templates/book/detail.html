@@ -4,8 +4,82 @@
 {% block topfiles %}
 {% endblock topfiles %}
 {% block body %}
-    <div>
+   <!--<div>
         {{ book.book_name }}<br>
         {{ book.author }}
+    </div>-->
+
+
+    <div class="breadcrumb">
+        <a href="#">全部分类</a>
+        <span>></span>
+        <a href="#">{{ book.kind_name }}</a>
+        <span>></span>
+        <a href="#">商品详情</a>
     </div>
+
+    <div class="book_detail_con clearfix">
+        <div class="book_detail_pic fl"><img src="book.book_picture"></div> {# 图片显示有问题？？？ #}
+
+        <div class="book_detail_list fr">
+            <h4><em>书 名：</em>{{ book.book_name }}</h4> {# 名字显示也有问题？？？orz #}
+            <h4>作 者：{{ book.author }}</h4>
+            <h4>ISBN：{{ book.isbn }}</h4>
+            <h4>出 版 社：{{ book.press }}</h4>
+            <h4>原 价：{{ book.price_old }} 售 价：{{ book.price }}</h4>
+
+
+            <div class="price_bar">
+                <span class="show_pirze">¥<em>{{ book.price }}</em></span>
+                <span class="show_unit">单  位：{{ books.unit }}</span> {# ???? #}
+            </div>
+            <div class="book_num clearfix">
+                <div class="num_name fl">数 量：</div>
+                <div class="num_add fl">
+                    <input type="text" class="num_show fl" value="1">
+                    <a href="javascript:;" class="add fr">+</a>
+                    <a href="javascript:;" class="minus fr">-</a>
+                </div>
+            </div>
+            <div class="total">总价：¥<em>{{ book.price }}</em></div>
+            <div class="operate_btn">
+                <a href="javascript:;" class="buy_btn">立即购买</a>
+                <a href="javascript:;" class="add_cart" id="add_cart">加入购物车</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="main_wrap clearfix">
+        <div class="l_wrap fl clearfix">
+            <div class="new_book">
+                <h3>新品推荐</h3>
+                <ul>
+                    {% for book in books_li %}
+                    <li>
+                        <a href="{% url 'books:detail' books_id=book.book_id %}"><img src="{% static book.book_picture %}"></a>
+                        <h4><a href="{% url 'books:detail' books_id=book.book_id %}">{{ book.book_name }}</a></h4>
+                        <div class="price">￥{{ book.price }}</div>
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+
+        <div class="r_wrap fr clearfix">
+            <ul class="detail_tab clearfix">
+                <li class="active">商品介绍</li>
+                <li>评论</li>
+            </ul>
+
+            <div class="tab_content">
+                <dl>
+                    <dt>商品详情：</dt>
+                    <dd>{{ book.description }}</dd>
+                </dl>
+            </div>
+
+        </div>
+    </div>
+    <div class="add_jump"></div>
+
 {% endblock body %}
