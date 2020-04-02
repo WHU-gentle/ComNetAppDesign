@@ -16,7 +16,7 @@
             {% if books is not none %}
                 {% for book in books %}
                     <div>
-                    <img src="{{ book.picture }}" height="140" width="100">
+                    <img src="{% static book.picture %}" height="140" width="100">
                     </div>
 
                 {% endfor %}
