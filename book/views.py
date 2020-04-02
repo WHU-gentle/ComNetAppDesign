@@ -45,7 +45,7 @@ def kind(request, kind_id):
             'sales': book.sales,
         }
         books.append(book_detail)
-    return render(request, 'book/kind,html', {'books':books, 'kind_name':kind_name})
+    return render(request, 'book/kind.html', {'books':books, 'kind_name':kind_name})
 
 def sort_by(book):
     return book.sales

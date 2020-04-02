@@ -4,10 +4,30 @@
 {% block topfiles %}
 {% endblock topfiles %}
 {% block body %}
-    {% for book in books %}
-        <div>
-        {{ book.book_name }}<br>
-        {{ book.author }}
+
+     <div class="breadcrumb">
+        <a href="#">全部分类</a>
+        <span>></span>
+        <a href="#">{{ kind_name }}</a>
+    </div>
+
+    <div class='book_kind_con'>
+        <div class='con'>
+            {% if books is not none %}
+                {% for book in books %}
+                    <div>
+                    <img src="https://img3.doubanio.com/view/subject/s/public/s1429010.jpg">
+                    </div>
+
+                {% endfor %}
+            {% endif %}
         </div>
-    {% endfor %}
+
+    </div>
+
+
+
+
+
 {% endblock body %}
+
