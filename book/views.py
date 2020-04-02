@@ -2,21 +2,83 @@ from django.http import JsonResponse
 from django.shortcuts import render
 from user.models import Cart
 from book.models import Book
+from django.http import HttpResponse, JsonResponse
+from .models import Book
 
 
 # Create your views here.
 
 
 def detail(request, book_id):
-    pass
+    try:
+        book = Book.objects.get(pk=book_id)
+    except Book.DoesNotExist:
+        return HttpResponse("你所访问的页面不存在", status=404)
+
+    book_detail = {
+        'name': book.book_name,
+        'picture': book.book_picture,
+        'price': book.price,
+        'price_old': book.price_old,
+        'author': book.author,
+        'isbn': book.isbn,
+        'press': book.press,
+        'rest': book.rest,
+        'kind_name': book.kind_name,
+        'kind_id': book.kind_id,
+        'sales': book.sales,
+        'description': book.description,
+    }
+    return render(request, 'book/detail.html', {'book': book_detail})
 
 
 def kind(request, kind_id):
-    pass
+    bookList = Book.objects.filter(kind_id=kind_id)
+    if len(bookList) == 0:
+        return HttpResponse("你所访问的页面不存在", status=404)
+
+    kind_name = bookList[0].kind_name
+    books = []
+    for book in bookList:
+        book_detail = {
+            'name': book.book_name,
+            'picture': book.book_picture,
+            'price': book.price,
+            'price_old': book.price_old,
+            'author': book.author,
+            'press': book.press,
+            'rest': book.rest,
+            'sales': book.sales,
+        }
+        books.append(book_detail)
+    return render(request, 'book/kind.html', {'books': books, 'kind_name': kind_name})
+
+
+def sort_by(book):
+    return book.sales
 
 
 def search(request, keyword):
-    pass
+    bookList1 = Book.objects.filter(book_name__contains=keyword)
+    bookList2 = Book.objects.filter(author__contains=keyword)
+    bookList3 = Book.objects.filter(press__contains=keyword)
+    bookList = bookList1.append(bookList2).append(bookList3)
+    bookList.sort(key=sort_by, reverse=True)
+
+    books = []
+    for book in bookList:
+        book_detail = {
+            'name': book.book_name,
+            'picture': book.book_picture,
+            'price': book.price,
+            'price_old': book.price_old,
+            'author': book.author,
+            'press': book.press,
+            'rest': book.rest,
+            'sales': book.sales,
+        }
+        books.append(book_detail)
+    return JsonResponse({"books": books})
 
 
 # 用户将一本书加入购物车
@@ -42,7 +104,7 @@ def buy(request):
         raise Exception('购物车中同一商品出现多次')
     else:
         # 之前存在,数量+1
-        Cart.objects.filter(user_id=request.session['user']['user_id'], book_id=book_id).update(number=now.number+1)
+        Cart.objects.filter(user_id=request.session['user']['user_id'], book_id=book_id).update(number=now.number + 1)
     return JsonResponse({'res': 1})
 
 
