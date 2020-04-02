@@ -2,6 +2,8 @@ from django.contrib import admin
 
 # Register your models here.
 from .models import Book
+
+
 class BookAdmin(admin.ModelAdmin):
     list_display = ['book_id', 'book_name', 'book_picture', 'price', 'price_old', 'author',
                     'isbn', 'press', 'rest', 'kind_id', 'kind_name', 'description', 'sales']
@@ -13,4 +15,6 @@ class BookAdmin(admin.ModelAdmin):
         ("describe", {"fields": ['book_picture', 'isbn', 'kind_id', 'kind_name', 'description']}),
         ("sale", {"fields": ['price', 'price_old', 'rest', 'sales']})
     ]
+
+
 admin.site.register(Book, BookAdmin)

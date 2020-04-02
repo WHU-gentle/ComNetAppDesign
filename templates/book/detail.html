@@ -19,10 +19,10 @@
     </div>
 
     <div class="book_detail_con clearfix">
-        <div class="book_detail_pic fl"><img src="{% static book.book_picture %}"></div> {# 图片显示有问题？？？ #}
-        <!--<img src="book.book_picture">-->
+        <div class="book_detail_pic fl"><img src="{{ book.picture }}"></div>
+
         <div class="book_detail_list fr">
-            <h4><em>书 名：</em>{{ book.book_name }}</h4> {# 名字显示也有问题？？？orz #}
+            <h4><em>书 名：</em>{{ book.name }}</h4>
             <h4>作 者：{{ book.author }}</h4>
             <h4>ISBN：{{ book.isbn }}</h4>
             <h4>出 版 社：{{ book.press }}</h4>
@@ -31,7 +31,7 @@
 
             <div class="price_bar">
                 <span class="show_pirze">¥<em>{{ book.price }}</em></span>
-                <span class="show_unit">单  位：{{ books.unit }}</span> {# ???? #}
+<!--                <span class="show_unit">单  位：{{ books.unit }}</span> {# ???? #}-->
             </div>
             <div class="book_num clearfix">
                 <div class="num_name fl">数 量：</div>
