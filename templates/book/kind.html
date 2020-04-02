@@ -16,7 +16,7 @@
             {% if books is not none %}
                 {% for book in books %}
                     <div>
-                    <img src="https://img3.doubanio.com/view/subject/s/public/s1429010.jpg">
+                    <img src="{{ book.picture }}" height="140" width="100">
                     </div>
 
                 {% endfor %}
@@ -24,9 +24,6 @@
         </div>
 
     </div>
-
-
-
 
 
 {% endblock body %}

@@ -36,26 +36,37 @@
             <h3 class="fl" id="model01">经济</h3>
             <div class="subtitle fl">
                 <span>|</span>
-                {% for book in books %}
-                    <a href="{% url 'book:detail' book_id=book.book_id %}">{{ book.author }}</a>
-                {% endfor %}
+
             </div>
-            <a href="#" class="book_more fr">查看更多 ></a>
+            <a href="book/kind/1" class="book_more fr">查看更多 ></a>
         </div>
 
         <div class="book_con clearfix">
-            <div class="book_banner fl"><img src="https://img3.doubanio.com/view/subject/s/public/s1429010.jpg"></div>
-            <ul class="book_list fl">
-                {% for book in book_book %}
-                <li>
-                    <h4><a href="{% url 'books:detail' books_id=book.id  %}">{{ book.name }}</a></h4>
-                    <a href="{% url 'books:detail' books_id=book.id  %}"><img src="{% static book.image %}"></a>
-                    <div class="price">¥ {{ book.price }}</div>
-                </li>
-                {% endfor %}
-            </ul>
+            <div class='con_index'>
+                <div>
+                    <img src="https://img3.doubanio.com/view/subject/s/public/s1429010.jpg" height="224" width="160">
+                </div>
+                <div>
+                    <img src="https://img3.doubanio.com/view/subject/s/public/s1429010.jpg" height="224" width="160">
+                </div>
+                <div>
+                    <img src="https://img3.doubanio.com/view/subject/s/public/s1429010.jpg" height="224" width="160">
+                </div>
+                <div>
+                    <img src="https://img3.doubanio.com/view/subject/s/public/s1429010.jpg" height="224" width="160">
+                </div>
+                <div>
+                    <img src="https://img3.doubanio.com/view/subject/s/public/s1429010.jpg" height="224" width="160">
+                </div>
+
+            </div>
         </div>
     </div>
+
+
+
+
+
 
     <div class="list_model">
         <div class="list_title clearfix">
@@ -66,20 +77,28 @@
                     <a href="#">{{ book.name }}</a>
                 {% endfor %}
             </div>
-            <a href="#" class="book_more fr">查看更多 ></a>
+            <a href="book/kind/2" class="book_more fr">查看更多 ></a>
         </div>
 
         <div class="book_con clearfix">
-            <div class="book_banner fl"><img src="https://img1.doubanio.com/view/subject/s/public/s2768378.jpg"></div>
-            <ul class="book_list fl">
-                {% for book in javascript_hot %}
-                <li>
-                    <h4><a href="#">{{ book.name }}</a></h4>
-                    <a href="#"><img src="{% static book.image %}"></a>
-                    <div class="price">¥ {{ book.price }}</div>
-                </li>
-                {% endfor %}
-            </ul>
+            <div class='con_index'>
+                <div>
+                    <img src="https://img1.doubanio.com/view/subject/s/public/s2768378.jpg" height="224" width="160">
+                </div>
+                <div>
+                    <img src="https://img1.doubanio.com/view/subject/s/public/s2768378.jpg" height="224" width="160">
+                </div>
+                <div>
+                    <img src="https://img1.doubanio.com/view/subject/s/public/s2768378.jpg" height="224" width="160">
+                </div>
+                <div>
+                    <img src="https://img1.doubanio.com/view/subject/s/public/s2768378.jpg" height="224" width="160">
+                </div>
+                <div>
+                    <img src="https://img1.doubanio.com/view/subject/s/public/s2768378.jpg" height="224" width="160">
+                </div>
+
+            </div>
         </div>
     </div>
 
@@ -92,21 +111,30 @@
                     <a href="#">{{ book.name }}</a>
                 {% endfor %}
             </div>
-            <a href="#" class="book_more fr">查看更多 ></a>
+            <a href="book/kind/3" class="book_more fr">查看更多 ></a>
         </div>
 
         <div class="book_con clearfix">
-            <div class="book_banner fl"><img src="https://img1.doubanio.com/view/subject/s/public/s28341439.jpg"></div>
-            <ul class="book_list fl">
-                {% for book in algorithms_hot %}
-                <li>
-                    <h4><a href="#">{{ book.name }}</a></h4>
-                    <a href="#"><img src="{% static book.image %}"></a>
-                    <div class="price">¥ {{ book.price }}</div>
-                </li>
-                {% endfor %}
-            </ul>
+            <div class='con_index'>
+                <div>
+                    <img src="https://img1.doubanio.com/view/subject/s/public/s28341439.jpg" height="224" width="160">
+                </div>
+                <div>
+                    <img src="https://img1.doubanio.com/view/subject/s/public/s28341439.jpg" height="224" width="160">
+                </div>
+                <div>
+                    <img src="https://img1.doubanio.com/view/subject/s/public/s28341439.jpg" height="224" width="160">
+                </div>
+                <div>
+                    <img src="https://img1.doubanio.com/view/subject/s/public/s28341439.jpg" height="224" width="160">
+                </div>
+                <div>
+                    <img src="https://img1.doubanio.com/view/subject/s/public/s28341439.jpg" height="224" width="160">
+                </div>
+
+            </div>
         </div>
+
     </div>
 
     <div class="list_model">
@@ -118,21 +146,30 @@
                     <a href="#">{{ book.name }}</a>
                 {% endfor %}
             </div>
-            <a href="#" class="book_more fr">查看更多 ></a>
+            <a href="book/kind/4" class="book_more fr">查看更多 ></a>
         </div>
 
         <div class="book_con clearfix">
-            <div class="book_banner fl"><img src="https://img3.doubanio.com/view/subject/s/public/s3563113.jpg"></div>
-            <ul class="book_list fl">
-                {% for book in machinelearning_hot %}
-                <li>
-                    <h4><a href="#">{{ book.name }}</a></h4>
-                    <a href="#"><img src="{% static book.image %}"></a>
-                    <div class="price">¥ {{ book.price }}</div>
-                </li>
-                {% endfor %}
-            </ul>
+            <div class='con_index'>
+                <div>
+                    <img src="https://img3.doubanio.com/view/subject/s/public/s3563113.jpg" height="224" width="160">
+                </div>
+                <div>
+                    <img src="https://img3.doubanio.com/view/subject/s/public/s3563113.jpg" height="224" width="160">
+                </div>
+                <div>
+                    <img src="https://img3.doubanio.com/view/subject/s/public/s3563113.jpg" height="224" width="160">
+                </div>
+                <div>
+                    <img src="https://img3.doubanio.com/view/subject/s/public/s3563113.jpg" height="224" width="160">
+                </div>
+                <div>
+                    <img src="https://img3.doubanio.com/view/subject/s/public/s3563113.jpg" height="224" width="160">
+                </div>
+
+            </div>
         </div>
+
     </div>
 
     <div class="list_model">
@@ -144,21 +181,30 @@
                     <a href="#">{{ book.name }}</a>
                 {% endfor %}
             </div>
-            <a href="#" class="book_more fr">查看更多 ></a>
+            <a href="book/kind/5" class="book_more fr">查看更多 ></a>
         </div>
 
         <div class="book_con clearfix">
-            <div class="book_banner fl"><img src="https://img9.doubanio.com/view/subject/s/public/s6384944.jpg"></div>
-            <ul class="book_list fl">
-                {% for book in operatingsystem_hot %}
-                <li>
-                    <h4><a href="#">{{ book.name }}</a></h4>
-                    <a href="#"><img src="{% static book.image %}"></a>
-                    <div class="price">¥ {{ book.price }}</div>
-                </li>
-                {% endfor %}
-            </ul>
+            <div class='con_index'>
+                <div>
+                    <img src="https://img9.doubanio.com/view/subject/s/public/s6384944.jpg" height="224" width="160">
+                </div>
+                <div>
+                    <img src="https://img9.doubanio.com/view/subject/s/public/s6384944.jpg" height="224" width="160">
+                </div>
+                <div>
+                    <img src="https://img9.doubanio.com/view/subject/s/public/s6384944.jpg" height="224" width="160">
+                </div>
+                <div>
+                    <img src="https://img9.doubanio.com/view/subject/s/public/s6384944.jpg" height="224" width="160">
+                </div>
+                <div>
+                    <img src="https://img9.doubanio.com/view/subject/s/public/s6384944.jpg" height="224" width="160">
+                </div>
+
+            </div>
         </div>
+
     </div>
 
     <div class="list_model">
@@ -170,21 +216,30 @@
                     <a href="#">{{ book.name }}</a>
                 {% endfor %}
             </div>
-            <a href="#" class="book_more fr">查看更多 ></a>
         </div>
 
+
         <div class="book_con clearfix">
-            <div class="book_banner fl"><img src="https://img1.doubanio.com/view/subject/s/public/s3668327.jpg"></div>
-            <ul class="book_list fl">
-                {% for book in database_hot %}
-                <li>
-                    <h4><a href="#">{{ book.name }}</a></h4>
-                    <a href="#"><img src="{% static book.image %}"></a>
-                    <div class="price">¥ {{ book.price }}</div>
-                </li>
-                {% endfor %}
-            </ul>
+            <div class='con_index'>
+                <div>
+                    <img src="https://img1.doubanio.com/view/subject/s/public/s3668327.jpg" height="224" width="160">
+                </div>
+                <div>
+                    <img src="https://img1.doubanio.com/view/subject/s/public/s3668327.jpg" height="224" width="160">
+                </div>
+                <div>
+                    <img src="https://img1.doubanio.com/view/subject/s/public/s3668327.jpg" height="224" width="160">
+                </div>
+                <div>
+                    <img src="https://img1.doubanio.com/view/subject/s/public/s3668327.jpg" height="224" width="160">
+                </div>
+                <div>
+                    <img src="https://img1.doubanio.com/view/subject/s/public/s3668327.jpg" height="224" width="160">
+                </div>
+
+            </div>
         </div>
+
     </div>
 
 {% endblock body %}
