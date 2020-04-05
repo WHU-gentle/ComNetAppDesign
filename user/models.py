@@ -22,7 +22,7 @@ class User(models.Model):
 class Cart(models.Model):
     def __str__(self):
         return str(self.user_id) + '的购物车'
-    user_id = models.IntegerField(primary_key = True)
+    user_id = models.IntegerField()
     book_id = models.IntegerField()
     number = models.IntegerField(default=1)
     price = models.FloatField()

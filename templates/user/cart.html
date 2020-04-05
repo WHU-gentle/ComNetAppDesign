@@ -4,5 +4,31 @@
 {% block topfiles %}
 {% endblock topfiles %}
 {% block body %}
-    cart
+<div class="cart-thead">
+    <!-- 我的冰箱 -->
+                                        <div class="column t-checkbox">
+<div class="cart-checkbox">
+    <input type="checkbox"  name="toggle-checkboxes" class="jdcheckbox" clstag="clickcart|keycount|xincart|cart_allCheck">
+    <label  for="">勾选全部商品</label>
+</div>
+全选
+</div>
+<div class="column t-goods">商品</div>
+<div class="column t-props"></div>
+<div class="column t-price">单价</div>
+<div class="column t-quantity">数量</div>
+<div class="column t-sum">小计</div>
+<div class="column t-action">操作</div>
+</div>
+
+{% if cart_list is not none %}
+    {% for cart in cart_list %}
+        <a href="../../book/detail/{{cart.book_id}}/" target='_blank' class="" pnc="false" pncs="">
+        <img alt="{{ cart.book_name }}" clstag="clickcart|keycount|xincart|cart_sku_pic" src="{% static cart.book_image %}">
+        </a>
+        {{ cart.number }}
+        {{ cart.price }}
+    {% endfor %}
+{% endif %}
+
 {% endblock body %}

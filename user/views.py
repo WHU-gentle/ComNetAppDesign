@@ -1,8 +1,10 @@
 
 from django.shortcuts import render, redirect, reverse
 from django.http import Http404, HttpResponse, JsonResponse
+from django.forms.models import model_to_dict
 
-from .models import User
+from .models import User, Cart
+from book.models import Book
 
 import datetime
 
@@ -119,7 +121,20 @@ def result(request):
 
 
 def cart(request):
-    return render(request, 'user/cart.html')
+    if request.session.get('islogin', False):
+        u_name = request.session['user']['user_name'] 
+        u_id = User.objects.get(user_name=u_name).user_id
+        cart_list = Cart.objects.filter(user_id=u_id)
+        cart_data = []
+        for cart in cart_list:
+            cart = model_to_dict(cart)
+            book = Book.objects.get(book_id = cart['book_id'])
+            cart['book_image'] = book.book_picture
+            cart['book_name'] = book.book_name
+            cart_data.append(cart)
+        return render(request, 'user/cart.html', {'cart_list': cart_data})
+    else:
+        return render(request, 'user/login.html')
 
 
 def order(request):

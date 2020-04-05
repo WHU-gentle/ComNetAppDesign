@@ -49,6 +49,7 @@ def kind(request, kind_id):
             'press': book.press,
             'rest': book.rest,
             'sales': book.sales,
+            'id': book.book_id
         }
         books.append(book_detail)
     return render(request, 'book/kind.html', {'books': books, 'kind_name': kind_name})

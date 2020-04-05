@@ -16,9 +16,10 @@
             {% if books is not none %}
                 {% for book in books %}
                     <div>
+                    <a href="../../detail/{{ book.id }}">
                     <img src="{% static book.picture %}" height="140" width="100">
+                    </a>
                     </div>
-
                 {% endfor %}
             {% endif %}
         </div>
