@@ -1,32 +1,32 @@
 {% extends 'base.html' %}
 {% load static %}
 {% block body %}
-    <div class="total_count">全部商品<em>0</em>件</div>
+    <div class="total_count">全部商品<em>{{ size }}</em>件</div>
     <ul class="cart_list_th clearfix">
         <li class="col01">商品名称</li>
-        <li class="col02">商品详情</li>
+        <li class="col02">作者</li>
         <li class="col03">商品价格</li>
         <li class="col04">数量</li>
         <li class="col05">小计</li>
         <li class="col06">操作</li>
     </ul>
 
-    {% for book in books %}
+    {% for cart in cart_list %}
     <ul class="cart_list_td clearfix">
         {# 提交表单时，如果checkbox没有被选中，它的值不会被提交 #}
-        <li class="col01"><input type="checkbox" name="books_id" value="{{ book.id }}" checked></li>
-        <li class="col02"><img src="{% static book.picture %}" alt=""></li>
-        <li class="col03">{{ book.name }}<br><em>{{ book.price }}元/</em></li>
-        <li class="col04">{{book.unit}}</li>
-        <li class="col05">{{ book.price }}</li>
+        <li class="col01"><input type="checkbox" name="books_id" value="{{ cart.book_id }}" checked></li>
+        <li class="col02"><a href="../../book/detail/{{ cart.book_id }}"><img src="{% static cart.book.book_picture %}" alt=""></a></li>
+        <li class="col03">{{ cart.book.book_name }}<br><em>{{ cart.book.price }}元</em></li>
+        <li class="col04">{{ cart.book.author }}</li>
+        <li class="col05">{{ cart.book.price }}</li>
         <li class="col06">
             <div class="num_add">
                 <a href="javascript:" class="add fl">+</a>
-                <input type="text" books_id="{{ book.id }}" class="num_show fl" value="{{ book.count }}">
+                <input type="text" books_id="{{ cart.book_id }}" class="num_show fl" value="{{ cart.number }}">
                 <a href="javascript:" class="minus fl">-</a>
             </div>
         </li>
-        <li class="col07">{{ book.amount }}元</li>
+        <li class="col07">{{ cart.price }}元</li>
         <li class="col08"><a href="javascript:">删除</a></li>
     </ul>
     {% endfor %}
@@ -38,15 +38,4 @@
         <li class="col04"><input type="submit" value="去结算"></li>
         {% csrf_token %}
     </ul>
-
-    {% if cart_list is not none %}
-    {% for cart in cart_list %}
-        <a href="../../book/detail/{{cart.book_id}}/" target='_blank' class="" pnc="false" pncs="">
-        <img alt="{{ cart.book_name }}" clstag="clickcart|keycount|xincart|cart_sku_pic" src="{% static cart.book_image %}">
-        </a>
-        {{ cart.number }}
-        {{ cart.price }}
-    {% endfor %}
-    {% endif %}
-
 {% endblock %}

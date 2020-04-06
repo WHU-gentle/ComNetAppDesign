@@ -129,10 +129,9 @@ def cart(request):
         for cart in cart_list:
             cart = model_to_dict(cart)
             book = Book.objects.get(book_id = cart['book_id'])
-            cart['book_image'] = book.book_picture
-            cart['book_name'] = book.book_name
+            cart['book'] = book
             cart_data.append(cart)
-        return render(request, 'user/cart.html', {'cart_list': cart_data})
+        return render(request, 'user/cart.html', {'cart_list': cart_data, 'size': len(cart_data)})
     else:
         return render(request, 'user/login.html')
 
