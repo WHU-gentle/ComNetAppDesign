@@ -82,9 +82,10 @@ def search(request, keyword):
     return JsonResponse({"books": books})
 
 
-# 用户将一本书加入购物车
+# 用户将number本书加入购物车（缺省1本）
 def buy(request):
     book_id = request.GET.get('book_id')
+    number = request.GET.get('number', 1)
     try:
         now = Cart.objects.get(user_id=request.session['user']['user_id'], book_id=book_id)
     except Cart.DoesNotExist:
@@ -97,7 +98,7 @@ def buy(request):
         Cart.objects.create(
             user_id=request.session['user']['user_id'],
             book_id=book_id,
-            number=1,
+            number=number,
             price=book.price,
         )
     except Cart.MultipleObjectsReturned:
@@ -105,7 +106,7 @@ def buy(request):
         raise Exception('购物车中同一商品出现多次')
     else:
         # 之前存在,数量+1
-        Cart.objects.filter(user_id=request.session['user']['user_id'], book_id=book_id).update(number=now.number + 1)
+        Cart.objects.filter(user_id=request.session['user']['user_id'], book_id=book_id).update(number=now.number + number)
     return JsonResponse({'res': 1})
 
 
