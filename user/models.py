@@ -26,3 +26,4 @@ class Cart(models.Model):
     book_id = models.IntegerField()
     number = models.IntegerField(default=1)
     price = models.FloatField()
+    select = models.BooleanField(default=True)

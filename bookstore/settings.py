@@ -145,3 +145,6 @@ EMAIL_PORT = 465
 EMAIL_HOST_USER = 'yusitong1999@qq.com' # 帐号
 EMAIL_HOST_PASSWORD = 'xcjzwgewebtpbccj'  # 密码
 DEFAULT_FROM_EMAIL = 'yusitong <' + EMAIL_HOST_USER + '>'
+
+# 使用本地时间
+USE_TZ = False

@@ -45,7 +45,7 @@
 > | 购物车书籍号 | book_id |
 > | 书籍数量     | number  |
 > | 书籍单价     | price   |
-> | 选中（计划） | select  |
+> | 选中         | select  |
 
 
 
@@ -130,7 +130,7 @@
 > | 加入购物车接口（更新）                       | book/buy/?book_id=\<int:book_id>&number=\<int:number>        | 购物车表没有加入，已有数量+number（详情页加购）              | 于斯同已完成                         |
 > | 移出购物车接口                               | book/cancel/?book_id=\<int:book_id>                          | 移出购物车表（购物车页删除）                                 | 于斯同已完成                         |
 > | 数量设置                                     | book/set_number/?book_id=\<int:book_id>&number=\<int:number> | 购物车表中数量设置（购物车页加、减、输入）                   | 于斯同已完成                         |
-> | 反转选中状态                                 | book/select/?book_id=\<int:book_id>                          | 购物车中选择状态                                             | 于斯同计划中                         |
+> | 反转选中状态                                 | book/select/?book_id=\<int:book_id>                          | 购物车中选择状态                                             | 于斯同已完成                         |
 >
 
 #### 主要流程

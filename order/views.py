@@ -7,6 +7,7 @@ from order.models import Order, OrderContent
 
 import datetime
 
+
 def all(request):
     pass
 
@@ -32,7 +33,10 @@ def new(request):
     print(order.order_id)
 
     sum_price = 0.0
-    for book in Cart.objects.filter(user_id=request.session['user']['user_id']).all():
+    for book in Cart.objects.filter(
+            user_id=request.session['user']['user_id'],
+            select=True,
+    ).all():
         OrderContent.objects.create(
             order_id=order.order_id,
             book_id=book.book_id,
@@ -41,7 +45,10 @@ def new(request):
         )
         sum_price += book.number * book.price
     Order.objects.filter(order_id=order.order_id).update(sum_price=sum_price)
-    Cart.objects.filter(user_id=request.session['user']['user_id']).delete()
+    Cart.objects.filter(
+        user_id=request.session['user']['user_id'],
+        select=True,
+    ).delete()
     # order.save()
     return JsonResponse({'res': 1})
 

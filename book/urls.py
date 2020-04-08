@@ -17,4 +17,6 @@ urlpatterns = [
     path('cancel/', views.cancel, name='cancel'),
     # 购物车书数目设置为
     path('set_number/', views.set_number, name='set_number'),
+    # 购物车书选中状态反转
+    path('select/', views.select, name='select'),
 ]

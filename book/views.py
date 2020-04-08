@@ -100,6 +100,7 @@ def buy(request):
             book_id=book_id,
             number=number,
             price=book.price,
+            select=True,
         )
     except Cart.MultipleObjectsReturned:
         # 购物车表中出现多次
@@ -149,6 +150,7 @@ def set_number(request):
             book_id=book_id,
             number=number,
             price=book.price,
+            select=True,
         )
     except Cart.MultipleObjectsReturned:
         # 购物车表中出现多次
@@ -156,4 +158,19 @@ def set_number(request):
     else:
         # 之前存在,数量=number
         Cart.objects.filter(user_id=request.session['user']['user_id'], book_id=book_id).update(number=number)
+    return JsonResponse({'res': 1})
+
+
+# 购物车书选中状态反转
+def select(request):
+    book_id = request.GET.get('book_id')
+    try:
+        now = Cart.objects.get(user_id=request.session['user']['user_id'], book_id=book_id)
+    except Cart.DoesNotExist:
+        raise Exception('购物车中商品不存在')
+    except Cart.MultipleObjectsReturned:
+        raise Exception('购物车中同一商品出现多次')
+    else:
+        # 之前存在,状态反转
+        Cart.objects.filter(user_id=request.session['user']['user_id'], book_id=book_id).update(select=not now.select)
     return JsonResponse({'res': 1})

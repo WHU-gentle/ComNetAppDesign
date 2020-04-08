@@ -1,4 +1,3 @@
-
 from django.shortcuts import render, redirect, reverse
 from django.http import Http404, HttpResponse, JsonResponse
 from django.forms.models import model_to_dict
@@ -7,6 +6,7 @@ from .models import User, Cart
 from book.models import Book
 
 import datetime
+
 
 # Create your views here.
 
@@ -202,7 +202,6 @@ import random
 import time
 import re
 
-
 from django.conf import settings
 from django.core.mail import EmailMultiAlternatives
 
@@ -223,7 +222,6 @@ def verifyemail(request):
     subject = '珞珈网上书店 验证码'
     text_content = '验证码:' + code
     html_content = '验证码<br><big><strong>' + code + '</strong></big>'
-
 
     try:
         msg = EmailMultiAlternatives(subject, text_content, from_email, [email])
