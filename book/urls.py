@@ -13,6 +13,8 @@ urlpatterns = [
     path('search?<str:keyword>/', views.search, name='search'),
     # 加入购物车指定本书（缺省为1）
     path('buy/', views.buy, name='buy'),
-    # 移出购物车
+    # 全部移出购物车
     path('cancel/', views.cancel, name='cancel'),
+    # 购物车书数目设置为
+    path('set_number/', views.set_number, name='set_number'),
 ]

@@ -125,3 +125,35 @@ def cancel(request):
         # 之前存在,数量+1
         now.delete()
     return JsonResponse({'res': 1})
+
+
+# 购物车书数量设置为
+def set_number(request):
+    book_id = request.GET.get('book_id')
+    number = request.GET.get('number')
+
+    if number is None:
+        raise Exception('未设置set_number数量')
+
+    try:
+        now = Cart.objects.get(user_id=request.session['user']['user_id'], book_id=book_id)
+    except Cart.DoesNotExist:
+        # 之前不存在，加入
+        try:
+            book = Book.objects.get(book_id=book_id)
+        except Exception:
+            return JsonResponse({'res': 0, 'errmsg': '不存在的商品'})
+
+        Cart.objects.create(
+            user_id=request.session['user']['user_id'],
+            book_id=book_id,
+            number=number,
+            price=book.price,
+        )
+    except Cart.MultipleObjectsReturned:
+        # 购物车表中出现多次
+        raise Exception('购物车中同一商品出现多次')
+    else:
+        # 之前存在,数量=number
+        Cart.objects.filter(user_id=request.session['user']['user_id'], book_id=book_id).update(number=number)
+    return JsonResponse({'res': 1})
