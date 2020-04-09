@@ -233,3 +233,5 @@ def verifyemail(request):
     except Exception:
         print("邮件发送失败")
         return JsonResponse({'res': 0, 'errmsg': '邮件发送失败'})
+
+

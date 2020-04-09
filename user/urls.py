@@ -17,3 +17,5 @@ urlpatterns = [
     path('verifyemail/', views.verifyemail, name="verifyemail"),
     path('login_check/', views.login_check, name="login_check"),
 ]
+
+
