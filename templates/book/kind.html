@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 {% load static %}
-{% block title %}{{ kind_name }}{% endblock title %}
+{% block title %}{{ book.kind_name }}{% endblock title %}
 {% block topfiles %}
 {% endblock topfiles %}
 {% block body %}
@@ -8,7 +8,7 @@
      <div class="breadcrumb">
         <a href="#">全部分类</a>
         <span>></span>
-        <a href="#">{{ kind_name }}</a>
+        <a href="#">{{ book.kind_name }}</a>
     </div>
 
     <div class='book_kind_con'>

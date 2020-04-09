@@ -2,7 +2,53 @@
 {% load static %}
 {% block title %}{{ book.book_name }}{% endblock title %}
 {% block topfiles %}
+    <script>
+$(function () {
+    update_total_price()
+    // 计算总价
+    function update_total_price() {
+        // 获取商品的价格和数量
+        book_price = $('.show_price').children('em').text()
+        book_count = $('.num_show').val()
+        // 计算商品的总价
+        book_price = parseFloat(book_price)
+        book_count = parseInt(book_count)
+        total_price = book_price * book_count
+        // 设置商品总价
+        $('.total').children('em').text(total_price.toFixed(2) + '元')
+    }
+
+    // 商品增加
+    $('.add').click(function () {
+        // 获取商品的数量
+        book_count = $('.num_show').val()
+        // 加1
+        book_count = parseInt(book_count) + 1
+        // 重新设置值
+        $('.num_show').val(book_count)
+        // 计算总价
+        update_total_price()
+    })
+
+    // 商品减少
+    $('.minus').click(function () {
+        // 获取商品的数量
+        book_count = $('.num_show').val()
+        // 加1
+        book_count = parseInt(book_count) - 1
+        if (book_count == 0){
+            book_count = 1
+        }
+        // 重新设置值
+        $('.num_show').val(book_count)
+        // 计算总价
+        update_total_price()
+    })
+})
+</script>
 {% endblock topfiles %}
+
+
 {% block body %}
 
     <div class="breadcrumb">
@@ -21,7 +67,8 @@
             <h4 style="font-size:12px;line-height:25px">作 者：{{ book.author }}</h4>
             <h4 style="font-size:12px;line-height:25px">ISBN：{{ book.isbn }}</h4>
             <h4 style="font-size:12px;line-height:25px">出 版 社：{{ book.press }}</h4>
-            <h4 style="font-size:12px;line-height:25px">原 价：{{ book.price_old }} 售 价：{{ book.price }}</h4>
+            <h4 style="font-size:12px;line-height:25px" class="show_price">原 价：{{ book.price_old }} &nbsp;&nbsp;&nbsp;  售 价：<em>{{ book.price }}</em></h4>
+
 
             <div class="book_num clearfix">
                 <div class="num_name fl">数 量：</div>
@@ -31,7 +78,7 @@
                     <a href="javascript:;" class="minus fr">-</a>
                 </div>
             </div>
-            <div class="total">总价：¥<em>{{ book.price }}</em></div>
+            <div class="total">总价：<em></em></div>
             <div class="operate_btn">
                 <a href="javascript:;" class="buy_btn">立即购买</a>
                 <a href="javascript:;" class="add_cart" id="add_cart">加入购物车</a>
@@ -49,4 +96,35 @@
     </div>
 
 
+    <script type="text/javascript">
+    $(function() {
+        $('#add_cart').click(function(){
+            // 获取商品的id和商品数量
+            var book_id = $(this).attr('book.book_id');
+            var book_count = $('.num_show').val();
+            var csrf = $('input[name="csrfmiddlewaretoken"]').val();
+            // 发起请求，访问/user/add/, 进行购物车数据的添加
+            var params = {
+                'book_id': book_id,
+                'book_count': book_count,
+                'csrfmiddlewaretoken': csrf
+            }
+
+            $.post('/user/add/', params, function (data) {
+                if (data.res == 4){
+                    // 添加成功
+                    var count = $('#show_count').html();
+                    var count = parseInt(count) + parseInt(book_count);
+                    $('#show_count').html(count);
+                } else {
+                    // 添加失败
+                    alert(data.errmsg)
+                }
+            })
+        })
+    })
+    </script>
 {% endblock body %}
+
+
+
