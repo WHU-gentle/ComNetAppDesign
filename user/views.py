@@ -7,8 +7,14 @@ from book.models import Book
 
 import datetime
 
-
 # Create your views here.
+'''
+安全性Bug：
+每次输错验证码后端强制让原验证码失效（所有前端内容均可能被篡改），前端重新获取
+发送验证邮件前也应该输入验证码/设置时间间隔
+尽可能缩短验证码有效时间（验证成功/失败后失效，过期失效）
+确保验证邮件的地址和最终注册地址相同，避免绑定错误的邮箱
+'''
 
 
 def login(request):
@@ -107,28 +113,98 @@ def register(request):
     return render(request, 'user/register.html')
 
 
+def register_check(user_name, password, repeat_password, phone_number, address, email, verify_code, verifyemail):
+    error_message = []
+    '''
+    用户信息限制：    （中文字符占用空间？）
+    '''
+    error_status = 0
+    # 用户名：不为空，不超过16个字符
+    if user_name == '':
+        error_status |= 1
+        error_message.append('用户名为空')
+    elif len(user_name) > 16:
+        error_status |= 1
+        error_message.append('用户名长度超过16个字符')
+    # 密码：至少6个字符，不超过16个字符
+    if len(password) < 6:
+        error_status |= 2
+        error_message.append('密码长度不足6个字符')
+    elif len(password) > 16:
+        error_status |= 2
+        error_message.append('密码长度超过16个字符')
+    # 重复密码
+    if password != repeat_password:
+        error_status |= 4
+        error_message.append('两次输入的密码不一致')
+    # 电话：不为空，不超过20， TODO 只含以下字符0123456789 +-() 如"(+86) 0311 8697-6542"
+    if phone_number == '':
+        error_status |= 8
+        error_message.append('电话号码为空')
+    elif len(phone_number) > 20:
+        error_status |= 8
+        error_message.append('电话号码长度超过20个字符')
+    # 地址：不超过100
+    if address == '':
+        error_status |= 16
+        error_message.append('地址为空')
+    elif len(address) > 100:
+        error_status |= 16
+        error_message.append('地址长度超过20个字符')
+    # 电子邮箱：不超过50，只含字母数字下划线，以字母开头（似乎不能以下划线开头？）
+    #     格式[a-zA-Z][a-zA-Z0-9_]*@([a-zA-Z0-9_\-]+\.)+[a-zA-Z0-9]+
+    #     或者只检查有没有@，反正用户收不到邮件自然得改
+    if '@' in email:
+        error_status |= 32
+        error_message.append('电子邮箱格式不正确')
+    elif len(email) > 50:
+        error_status |= 32
+        error_message.append('电子邮箱长度超过50个字符')
+    # 邮件验证码
+    if verify_code == '' or verify_code != verifyemail:
+        error_status |= 64
+        error_message.append('邮件验证码错误')
+
+    if error_status == 0:
+        return {'res': 1}
+    else:
+        return {'res': 0, 'error_message': error_message, 'error_status': error_status}
+
+
 def result(request):
-    if request.method == 'POST':
-        if request.POST['verify_code'] != request.session['verifyemail']:
-            return render(request, 'user/result.html', {'error_message': '验证码错误！'})
-        if request.POST['password'] != request.POST['repeat_password']:
-            return render(request, 'user/result.html', {'error_message': '两次输入密码不一致！'})
-        user = User(user_name=request.POST['user_name'], password=request.POST['password'],
-                    phone_number=request.POST['phone_number'], address=request.POST['address'],
-                    email=request.POST['email'], register_date=datetime.datetime.now())
+    if request.method != 'POST':
+        return render(request, 'user/result.html', {'error_message': '访问方式错误'})
+    user_name = request.POST.get('user_name')
+    password = request.POST.get('password')
+    repeat_password = request.POST.get('repeat_password')
+    phone_number = request.POST.get('phone_number')
+    address = request.POST.get('address')
+    email = request.POST.get('email')
+    verify_code = request.POST.get('verify_code')
+
+    res = register_check(user_name, password, repeat_password, phone_number, address,
+                          email, verify_code, request.session.get('verifyemail'))
+    # 无论验证结果，不能再次验证
+    request.session['verifycode'] = ''
+    if res == 0:
+        user = User(user_name=user_name, password=password,
+                    phone_number=phone_number, address=address,
+                    email=email, register_date=datetime.datetime.now())
         user.save()
         return render(request, 'user/result.html', {'message': '注册成功！', 'user_name': request.POST['user_name']})
+    else:
+        return render(request, 'user/result.html', {'error_message': res['error_message'], 'error_status': res['error_status']})
 
 
 def cart(request):
     if request.session.get('islogin', False):
-        u_name = request.session['user']['user_name'] 
+        u_name = request.session['user']['user_name']
         u_id = User.objects.get(user_name=u_name).user_id
         cart_list = Cart.objects.filter(user_id=u_id)
         cart_data = []
         for cart in cart_list:
             cart = model_to_dict(cart)
-            book = Book.objects.get(book_id = cart['book_id'])
+            book = Book.objects.get(book_id=cart['book_id'])
             cart['book'] = book
             cart_data.append(cart)
         return render(request, 'user/cart.html', {'cart_list': cart_data, 'size': len(cart_data)})
