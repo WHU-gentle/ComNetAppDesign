@@ -16,6 +16,7 @@ def detail(request, book_id):
         return HttpResponse("你所访问的页面不存在", status=404)
 
     book_detail = {
+        'id': book.book_id,
         'name': book.book_name,
         'picture': book.book_picture,
         'price': book.price,
@@ -126,7 +127,8 @@ def buy(request):
         # 之前存在,数量+number
         Cart.objects.filter(user_id=request.session['user']['user_id'], book_id=book_id)\
             .update(number=now.number + number)
-    return JsonResponse({'res': 1})
+    return JsonResponse({'res': 1, 'msg':'您成功添加了'+str(number)+'本'+str(book.book_name)})
+
 
 
 # 用户将同种所有书移出购物车
