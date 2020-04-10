@@ -1,9 +1,12 @@
-from django.http import JsonResponse
+from django.forms import model_to_dict
+from django.http import JsonResponse, Http404
 from django.shortcuts import render
 
 # Create your views here.
+from book.models import Book
 from user.models import Cart
 from order.models import Order, OrderContent
+from django.core import serializers
 
 import datetime
 
@@ -13,7 +16,45 @@ def all(request):
 
 
 def detail(request, order_id):
-    pass
+    content = {}
+    # 订单本身的信息
+    try:
+        order = Order.objects.get(order_id=order_id)
+    except Cart.DoesNotExist:
+        return Http404
+    except Cart.MultipleObjectsReturned:
+        raise Exception('同一订单号出现多次')
+
+    # object 转 dict
+    content['order'] = model_to_dict(order)
+
+    # 订单中书籍的信息
+    content['order_content'] = []
+    order_content = OrderContent.objects.filter(order_id=order_id)
+    for book in order_content:
+        element = {
+            'id': book.book_id,
+            'book_id': book.book_id,
+            'number': book.number,
+            'price': book.price,  # 此处是同种书的总价
+        }
+        try:
+            book = Book.objects.get(book_id=book.book_id)
+        except Cart.DoesNotExist:
+            raise Exception('书编号%d不存在' % book.book_id)
+        except Cart.MultipleObjectsReturned:
+            raise Exception('书编号%d出现多次' % book.book_id)
+        element.update({
+            'book_name': book.book_name,
+            'book_picture': book.book_picture,
+            'author': book.author,
+            'press': book.press,
+            'kind_name': book.kind_name,
+        })
+        content['order_content'].append(element)
+    # 因为没有对应前端，先返回成json
+    return JsonResponse(content)
+
 
 
 # 创建订单

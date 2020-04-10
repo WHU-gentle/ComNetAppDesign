@@ -128,6 +128,7 @@ def buy(request):
     return JsonResponse({'res': 1, 'msg':'您成功添加了'+str(number)+'本'+str(book.book_name)})
 
 
+
 # 用户将同种所有书移出购物车
 def cancel(request):
     book_id = request.GET.get('book_id')

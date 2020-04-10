@@ -44,21 +44,6 @@ $(function () {
         // 计算总价
         update_total_price()
     })
-    //加入购物车函数
-    $('#add_cart').click(function (){
-        var bookid_s = "{{ book.id }}"
-        var bookid = Number(bookid_s)
-        var number = $('.num_show').val()
-        var params = {
-            'book_id': bookid,
-            'number': number,
-        }
-        $.get('/book/buy/', params, function(data){
-            if(data.res == 0 )
-                alert(data.errmsg)
-            else alert(data.msg)
-        })
-    })
 })
 </script>
 {% endblock topfiles %}
