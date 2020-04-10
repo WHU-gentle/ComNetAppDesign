@@ -84,17 +84,32 @@ def search(request, keyword):
 
 # 用户将number本书加入购物车（缺省1本）
 def buy(request):
+    if request.method == 'POST':
+        return JsonResponse({'res': 0, 'errmsg': '访问方式错误'})
+
     book_id = request.GET.get('book_id')
     number = request.GET.get('number', 1)
+
+    # 检查数据不为空
+    if not all([book_id, number]):
+        return JsonResponse({'res': 0, 'errmsg': '数据不完整'})
+    # 检查商品存在
+    book = Book.objects.get(book_id=book_id)
+    if book is None:
+        # 商品不存在
+        return JsonResponse({'res': 0, 'errmsg': '商品不存在'})
+    # 数字
+    try:
+        number = int(number)
+    except Exception as e:
+        # 商品数目不合法
+        return JsonResponse({'res': 0, 'errmsg': '商品数量必须为数字'})
+
+    # 加入购物车
     try:
         now = Cart.objects.get(user_id=request.session['user']['user_id'], book_id=book_id)
     except Cart.DoesNotExist:
         # 之前不存在，加入
-        try:
-            book = Book.objects.get(book_id=book_id)
-        except Exception:
-            return JsonResponse({'res': 0, 'errmsg': '不存在的商品'})
-
         Cart.objects.create(
             user_id=request.session['user']['user_id'],
             book_id=book_id,
@@ -103,11 +118,12 @@ def buy(request):
             select=True,
         )
     except Cart.MultipleObjectsReturned:
-        # 购物车表中出现多次
+        # 购物车表中出现多次 数据库错误
         raise Exception('购物车中同一商品出现多次')
     else:
-        # 之前存在,数量+1
-        Cart.objects.filter(user_id=request.session['user']['user_id'], book_id=book_id).update(number=now.number + number)
+        # 之前存在,数量+number
+        Cart.objects.filter(user_id=request.session['user']['user_id'], book_id=book_id)\
+            .update(number=now.number + number)
     return JsonResponse({'res': 1})
 
 
