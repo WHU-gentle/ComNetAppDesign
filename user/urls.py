@@ -16,6 +16,7 @@ urlpatterns = [
     path('verifycode/', views.verifycode, name="verifycode"),
     path('verifyemail/', views.verifyemail, name="verifyemail"),
     path('login_check/', views.login_check, name="login_check"),
+    path('register_update/', views.register_update, name="register_update"),
 
    # path('count/', views.cart_count, name='count'), # TODO 获取用户购物车中商品的数量 base.html
 ]

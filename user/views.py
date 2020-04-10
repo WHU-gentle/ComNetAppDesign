@@ -84,13 +84,11 @@ def login_check(request):
 def detail(request):
     if request.session.get('islogin', False):
         context = {
-            'user': {
-                'user_name': request.session['user']['user_name'],
-                'phone_number': request.session['user']['phone_number'],
-                'address': request.session['user']['address'],
-                'email': request.session['user']['email'],
-                'register_date': request.session['user']['register_date'],
-            }
+            'user_name': request.session['user']['user_name'],
+            'phone_number': request.session['user']['phone_number'],
+            'address': request.session['user']['address'],
+            'email': request.session['user']['email'],
+            'register_date': request.session['user']['register_date'],
         }
         return render(request, 'user/detail.html', context)
     else:
@@ -153,7 +151,7 @@ def register_check(user_name, password, repeat_password, phone_number, address, 
     # 电子邮箱：不超过50，只含字母数字下划线，以字母开头（似乎不能以下划线开头？）
     #     格式[a-zA-Z][a-zA-Z0-9_]*@([a-zA-Z0-9_\-]+\.)+[a-zA-Z0-9]+
     #     或者只检查有没有@，反正用户收不到邮件自然得改
-    if '@' in email:
+    if '@' not in email:
         error_status |= 32
         error_message.append('电子邮箱格式不正确')
     elif len(email) > 50:
@@ -182,17 +180,67 @@ def result(request):
     verify_code = request.POST.get('verify_code')
 
     res = register_check(user_name, password, repeat_password, phone_number, address,
-                          email, verify_code, request.session.get('verifyemail'))
+                         email, verify_code, request.session.get('verifyemail'))
     # 无论验证结果，不能再次验证
     request.session['verifycode'] = ''
-    if res == 0:
+    if res['res'] == 1:
         user = User(user_name=user_name, password=password,
                     phone_number=phone_number, address=address,
                     email=email, register_date=datetime.datetime.now())
         user.save()
         return render(request, 'user/result.html', {'message': '注册成功！', 'user_name': request.POST['user_name']})
     else:
-        return render(request, 'user/result.html', {'error_message': res['error_message'], 'error_status': res['error_status']})
+        return render(request, 'user/result.html',
+                      {'error_message': res['error_message'], 'error_status': res['error_status']})
+
+
+def register_update(request):
+    if request.method != 'POST':
+        return JsonResponse({'res': 0, 'error_message': '访问方式错误'})
+    user_name = request.POST.get('user_name')
+    old_password = request.POST.get('old_password')
+    password = request.POST.get('password')
+    repeat_password = request.POST.get('repeat_password')
+    phone_number = request.POST.get('phone_number')
+    address = request.POST.get('address')
+    email = request.POST.get('email')
+    verify_code = request.POST.get('verify_code')
+
+    res = register_check(user_name, password, repeat_password, phone_number, address,
+                         email, verify_code, request.session.get('verifyemail'))
+    # 无论验证结果，不能再次验证
+    request.session['verifycode'] = ''
+
+    try:
+        me = User.objects.get(user_id=request.session['user']['user_id'])
+    except User.DoesNotExist:
+        return JsonResponse({'res': 0, 'errmsg': '用户不存在'})
+    except User.MultipleObjectsReturned:
+        raise Exception('用户同一id出现多次')
+    if me.password != old_password:
+        return JsonResponse({'res': 0, 'errmsg': '密码错误'})
+
+    request.session['user'] = {
+        'user_id': request.session['user']['user_id'],
+        'user_name': user_name,
+        'phone_number': phone_number,
+        'address': address,
+        'email': email,
+        'register_date': request.session['user']['register_date'],
+    }
+
+    if res['res'] == 1:
+        User.objects.filter(user_id=request.session['user']['user_id']).update(
+            user_name=user_name,
+            password=password,
+            phone_number=phone_number,
+            address=address,
+            email=email,
+        )
+        return JsonResponse({'res': 1})
+    else:
+        # TODO 有一个报错Expected type 'Iterable[str]', got 'int' instead ??
+        return JsonResponse({'res': 0, 'errmsg': '\n'.join(res['error_message'])})
 
 
 def cart(request):
