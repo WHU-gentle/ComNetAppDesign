@@ -1,6 +1,6 @@
 from django.forms import model_to_dict
-from django.http import JsonResponse, Http404
-from django.shortcuts import render
+from django.http import JsonResponse, Http404, HttpResponseRedirect 
+from django.shortcuts import render, redirect
 
 # Create your views here.
 from book.models import Book
@@ -47,7 +47,7 @@ def detail(request, order_id):
     order_content = OrderContent.objects.filter(order_id=order_id)
     for book in order_content:
         element = {
-            'id': book.book_id,
+            'id': book.order_id,
             'book_id': book.book_id,
             'number': book.number,
             'price': book.price,  # 此处是同种书的总价
@@ -61,13 +61,13 @@ def detail(request, order_id):
         element.update({
             'book_name': book.book_name,
             'book_picture': book.book_picture,
+            'book_price': book.price,
             'author': book.author,
             'press': book.press,
             'kind_name': book.kind_name,
         })
         content['order_content'].append(element)
-    # 因为没有对应前端，先返回成json
-    return JsonResponse(content)
+    return render(request, 'order/detail.html', content)
 
 
 # 创建订单
@@ -84,7 +84,7 @@ def new(request):
     )
     order.save()
 
-    print(order.order_id)
+    #print(order.order_id)
 
     sum_price = 0.0
     for book in Cart.objects.filter(
@@ -104,8 +104,8 @@ def new(request):
         select=True,
     ).delete()
     # order.save()
-    return JsonResponse({'res': 1})
-
+    #return JsonResponse({'res': 1, 'order_id':order.order_id})
+    return detail(request, order.order_id)
 
 def receive(request):
     try:

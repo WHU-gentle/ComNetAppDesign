@@ -22,7 +22,7 @@
             <input type="radio" name="pay_style">
             <label class="weixin">微信支付</label>
             <input type="radio" name="pay_style">
-            <label class="zhifubao"></label>
+            <label class="zhifubao">支付宝</label>
             <input type="radio" name="pay_style">
             <label class="bank">银行卡支付</label>
         </div>
@@ -38,31 +38,24 @@
             <li class="col04">数量</li>
             <li class="col05">小计</li>
         </ul>
+        {% for book in order_content %}
         <ul class="book_list_td clearfix">
-            <li class="col01">1</li>
-            <li class="col02"><img src="images/book/book012.jpg"></li>
-            <li class="col03">计算机程序设计艺术</li>
+            <li class="col01">&nbsp;</li>
+            <li class="col02"><img src="{% static book.book_picture %}"></li>
+            <li class="col03">{{ book.book_name }}</li>
             <li class="col04">册</li>
-            <li class="col05">25.80元</li>
-            <li class="col06">1</li>
-            <li class="col07">25.80元</li>
+            <li class="col05">{{ book.book_price }}</li>
+            <li class="col06">{{ book.number }}</li>
+            <li class="col07">{{ book.price }}元</li>
         </ul>
-        <ul class="book_list_td clearfix">
-            <li class="col01">2</li>
-            <li class="col02"><img src="images/book/book003.jpg"></li>
-            <li class="col03">Python Cookbook</li>
-            <li class="col04">册</li>
-            <li class="col05">16.80元</li>
-            <li class="col06">1</li>
-            <li class="col07">16.80元</li>
-        </ul>
+        {% endfor %}
     </div>
 
     <h3 class="common_title">总金额结算</h3>
 
     <div class="common_list_con clearfix">
         <div class="settle_con">
-            <div class="total_book_count">共<em>2</em>件商品，总金额<b>42.60元</b></div>
+            <div class="total_book_count">共<em>2</em>件商品，总金额<b>{{ order.sum_price }}元</b></div>
             <div class="transit">运费：<b>10元</b></div>
             <div class="total_pay">实付款：<b>52.60元</b></div>
         </div>

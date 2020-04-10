@@ -26,6 +26,7 @@ class CartAdmin(admin.ModelAdmin):
         'book_id',
         'number',
         'price',
+        'select'
     ]
 
 
