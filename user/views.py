@@ -56,7 +56,6 @@ def login_check(request):
     else:
         if user.password != request.POST['password']:
             return JsonResponse({'res': 0, 'errmsg': '密码错误'})
-    print('ok')
     next_url = '../../'
     jres = JsonResponse({'res': 1, 'next_url': next_url})
 

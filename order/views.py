@@ -56,7 +56,6 @@ def detail(request, order_id):
     return JsonResponse(content)
 
 
-
 # 创建订单
 def new(request):
     order = Order(
@@ -95,7 +94,10 @@ def new(request):
 
 
 def receive(request):
-    order_id = request.GET.get('order_id')
+    try:
+        order_id = int(request.GET.get('order_id'))
+    except ValueError:
+        return JsonResponse({'res': 0, 'errmsg': '订单号错误'})
     try:
         order = Order.objects.get(user_id=request.session['user']['user_id'], order_id=order_id)
     except Order.DoesNotExist:
