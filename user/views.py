@@ -212,8 +212,8 @@ def cart(request):
         return render(request, 'user/login.html')
 
 
-def order(request):
-    return render(request, 'user/order.html')
+# def order(request):
+#     return render(request, 'user/order.html')
 
 
 # 引入绘图模块
