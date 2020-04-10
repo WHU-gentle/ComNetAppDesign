@@ -4,7 +4,7 @@ from user.models import Cart
 from book.models import Book
 from django.http import HttpResponse, JsonResponse
 from .models import Book
-
+from django.db.models import Q
 
 # Create your views here.
 
@@ -59,12 +59,8 @@ def kind(request, kind_id):
 def sort_by(book):
     return book.sales
 
-
 def search(request, keyword):
-    bookList1 = Book.objects.filter(book_name__contains=keyword)
-    bookList2 = Book.objects.filter(author__contains=keyword)
-    bookList3 = Book.objects.filter(press__contains=keyword)
-    bookList = bookList1.append(bookList2).append(bookList3)
+    bookList = Book.objects.filter(Q(book_name__contains=keyword) | Q(author__contains=keyword) | Q(press__contains=keyword))
     bookList.sort(key=sort_by, reverse=True)
 
     books = []
@@ -80,7 +76,7 @@ def search(request, keyword):
             'sales': book.sales,
         }
         books.append(book_detail)
-    return JsonResponse({"books": books})
+    return render(request, 'book/search.html', {'books': books})
 
 
 # 用户将number本书加入购物车（缺省1本）

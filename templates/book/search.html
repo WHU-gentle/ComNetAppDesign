@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}搜索{% endblock title %}
+{% block topfiles %}
+{% endblock topfiles %}
+{% block body %}
+    <div>
+        <div>
+            {% for book in books %}
+                <div>
+                    <a href="../../detail/{{ book.id }}">
+                    <img src="{% static book.picture %}" height="140" width="100">
+                    </a>
+                </div>
+             {% endfor %}
+        </div>
+
+    </div>
+{% endblock body %}
