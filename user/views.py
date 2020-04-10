@@ -356,3 +356,62 @@ def verifyemail(request):
     except Exception:
         print("邮件发送失败")
         return JsonResponse({'res': 0, 'errmsg': '邮件发送失败'})
+
+def super_host(request):
+    return render(request, 'user/super/host.html')
+
+from ComNetAppDesign.book.models import Book
+from django.core.paginator import Paginator
+from django.http import HttpResponseRedirect
+def super_book(request, pageid):
+    allList = Book.objects.all()
+
+    kinds = []
+    for book in allList:
+        kind = {"kind_id":book.kind_id, "kind_name":book.kind_name}
+        if kind not in kinds:
+            kinds = kinds.append(kind)
+
+    paginator = Paginator(allList, 10)
+    if pageid in paginator.page_range:
+        page = paginator.page(pageid)
+        num = paginator.count
+        return render(request, 'user/super/book.html', {"books":page, "num":num, "kinds":kinds})
+    else:
+        return HttpResponseRedirect("/user/super/book/1/")
+
+def super_bookCreate(request):
+    book_name = request.POST.get("name")
+    book_picture = request.POST.get("pictrue")
+    price = request.POST.get("price")
+    price_old = request.POST.get("price_old")
+    author = request.POST.get("author")
+    isbn = request.POST.get("isbn")
+    press = request.POST.get("press")
+    rest = request.POST.get("rest")
+    kind_name = request.POST.get("kind_name")
+    kind_id = Book.objects.filter(kind_name=kind_name)[0].kind_id
+    description = request.POST.get("description")
+    sales = 0
+
+    book = Book.objects.create(
+        book_name=book_name,
+        book_picture=book_picture,
+        price=price,
+        price_old=price_old,
+        author=author,
+        isbn=isbn,
+        press=press,
+        rest=rest,
+        kind_id=kind_id,
+        kind_name=kind_name,
+        description=description,
+        sales=sales
+    )
+    return JsonResponse({'msg':"sucess"})
+
+def super_user(request, pageid):
+    pass
+
+def statistic(request):
+    pass

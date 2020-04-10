@@ -19,6 +19,13 @@ urlpatterns = [
     path('register_update/', views.register_update, name="register_update"),
 
    # path('count/', views.cart_count, name='count'), # TODO 获取用户购物车中商品的数量 base.html
+
+    #关于统计信息的超级用户的url
+    path('super/', views.super_host, name="super_host"),
+    path('super/book/<int:pageid>/', views.super_book, name="super_book"),
+    path('super/book/create/', views.super_bookCreate, name="super_bookCreate"),
+    path('super/user/<int:pageid>/', views.book_user, name="super_user"),
+    path('super/statistic/', views.statistic, name="statistic"),
 ]
 
 

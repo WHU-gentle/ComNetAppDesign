@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>书籍管理</title>
+</head>
+<body>
+    <div>
+        <div>
+            <form action="/user/super/book/create/" method="post">
+                书名：<input type="text" name="name" value=""/>
+                <hr/>
+                图片：<input type="text" name="pictrue" value=""/>
+                <hr/>
+                售价：<input type="number" name="price" value=""/>
+                <hr/>
+                原价：<input type="number" name="price_old" value=""/>
+                <hr/>
+                作者：<input type="text" name="author" value=""/>
+                <hr/>
+                isbn：<input type="text" name="isbn" value=""/>
+                <hr/>
+                出版社：<input type="text" name="press" value=""/>
+                <hr/>
+                库存：<input type="number" name="rest" value=""/>
+                <hr/>
+                类别：<input type="number" name="kind_id" list="kind_list"/>
+                <datalist id="kind_list">
+                    {% for kind in kinds %}
+                        <option>{{ kind.kind_name }}</option>
+                    {% endfor %}
+                </datalist>
+                <hr/>
+                详细描述：<input type="text" name="description" value=""/>
+                <hr/>
+                <input type="submit" value="添加"/>
+            </form>
+        </div>
+
+        <div>
+            {% for book in books %}
+                <div>
+                    {{book.book_name}}<br>
+                </div>
+            {% endfor %}
+        </div>
+
+        <div>
+            {% for page in books.paginator.page_range %}
+                {% if books.number == page %}
+                    <div>
+                        {{ page }}
+                    </div>
+                {% else %}
+                    <div>
+                        <a href="/user/super/book/{{ page }}/">{{ page }}</a>
+                    </div>
+                {% endif %}
+            {% end for %}
+        </div>
+    </div>
+</body>
+</html>
