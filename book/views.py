@@ -88,9 +88,17 @@ def buy(request):
     if request.method == 'POST':
         return JsonResponse({'res': 0, 'errmsg': '访问方式错误'})
 
-    book_id = request.GET.get('book_id')
-    number = request.GET.get('number', 1)
-
+    # 数字
+    try:
+        book_id = int(request.GET.get('book_id'))
+        number = int(request.GET.get('number', 1))
+    except ValueError:
+        # 商品数目不合法
+        return JsonResponse({'res': 0, 'errmsg': '商品数量必须为数字'})
+    print(book_id)
+    print(type(book_id))
+    print(number)
+    print(type(number))
     # 检查数据不为空
     if not all([book_id, number]):
         return JsonResponse({'res': 0, 'errmsg': '数据不完整'})
@@ -99,12 +107,6 @@ def buy(request):
     if book is None:
         # 商品不存在
         return JsonResponse({'res': 0, 'errmsg': '商品不存在'})
-    # 数字
-    try:
-        number = int(number)
-    except Exception as e:
-        # 商品数目不合法
-        return JsonResponse({'res': 0, 'errmsg': '商品数量必须为数字'})
 
     # 加入购物车
     try:
@@ -131,7 +133,11 @@ def buy(request):
 
 # 用户将同种所有书移出购物车
 def cancel(request):
-    book_id = request.GET.get('book_id')
+    try:
+        book_id = int(request.GET.get('book_id'))
+    except ValueError:
+        return JsonResponse({'res': 0, 'errmsg': '参数错误'})
+
     try:
         now = Cart.objects.get(user_id=request.session['user']['user_id'], book_id=book_id)
     except Cart.DoesNotExist:
@@ -148,8 +154,11 @@ def cancel(request):
 
 # 购物车书数量设置为
 def set_number(request):
-    book_id = request.GET.get('book_id')
-    number = request.GET.get('number')
+    try:
+        book_id = int(request.GET.get('book_id'))
+        number = int(request.GET.get('number'))
+    except ValueError:
+        return JsonResponse({'res': 0, 'errmsg': '参数错误'})
 
     if number is None:
         raise Exception('未设置set_number数量')
@@ -181,7 +190,11 @@ def set_number(request):
 
 # 购物车书选中状态反转
 def select(request):
-    book_id = request.GET.get('book_id')
+    try:
+        book_id = int(request.GET.get('book_id'))
+    except ValueError:
+        return JsonResponse({'res': 0, 'error_message': '书籍号错误'})
+
     try:
         now = Cart.objects.get(user_id=request.session['user']['user_id'], book_id=book_id)
     except Cart.DoesNotExist:

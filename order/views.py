@@ -12,7 +12,21 @@ import datetime
 
 
 def all(request):
-    pass
+    user_id = request.session['user']['user_id']
+    cancel_list = [model_to_dict(order) for order in Order.objects.filter(user_id=user_id, status=0)]
+    unpaid_list = [model_to_dict(order) for order in Order.objects.filter(user_id=user_id, status=1)]
+    unsent_list = [model_to_dict(order) for order in Order.objects.filter(user_id=user_id, status=2)]
+    unreceived_list = [model_to_dict(order) for order in Order.objects.filter(user_id=user_id, status=3)]
+    finished_list = [model_to_dict(order) for order in Order.objects.filter(user_id=user_id, status=4)]
+    content = {
+        'cancel_list': cancel_list,
+        'unpaid_list': unpaid_list,
+        'unsent_list': unsent_list,
+        'unreceived_list': unreceived_list,
+        'finished_list': finished_list,
+    }
+    # 因为没有对应前端，先返回成json
+    return JsonResponse(content)
 
 
 def detail(request, order_id):
@@ -56,7 +70,6 @@ def detail(request, order_id):
     return JsonResponse(content)
 
 
-
 # 创建订单
 def new(request):
     order = Order(
@@ -95,7 +108,10 @@ def new(request):
 
 
 def receive(request):
-    order_id = request.GET.get('order_id')
+    try:
+        order_id = int(request.GET.get('order_id'))
+    except ValueError:
+        return JsonResponse({'res': 0, 'errmsg': '订单号错误'})
     try:
         order = Order.objects.get(user_id=request.session['user']['user_id'], order_id=order_id)
     except Order.DoesNotExist:
