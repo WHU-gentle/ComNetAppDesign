@@ -13,6 +13,7 @@ import datetime
 
 def all(request):
     user_id = request.session['user']['user_id']
+    #all_list = [model_to_dict(order) for order in Order.objects.filter(user_id=user_id, status=[s for s in range(0,5)])]
     cancel_list = [model_to_dict(order) for order in Order.objects.filter(user_id=user_id, status=0)]
     unpaid_list = [model_to_dict(order) for order in Order.objects.filter(user_id=user_id, status=1)]
     unsent_list = [model_to_dict(order) for order in Order.objects.filter(user_id=user_id, status=2)]
@@ -24,9 +25,10 @@ def all(request):
         'unsent_list': unsent_list,
         'unreceived_list': unreceived_list,
         'finished_list': finished_list,
+        #'all_list': all_list
     }
     # 因为没有对应前端，先返回成json
-    return JsonResponse(content)
+    return render(request, 'order/all.html', content)
 
 
 def detail(request, order_id):

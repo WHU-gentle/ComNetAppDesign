@@ -360,7 +360,7 @@ def verifyemail(request):
 def super_host(request):
     return render(request, 'user/super/host.html')
 
-from ComNetAppDesign.book.models import Book
+from book.models import Book
 from django.core.paginator import Paginator
 from django.http import HttpResponseRedirect
 def super_book(request, pageid):

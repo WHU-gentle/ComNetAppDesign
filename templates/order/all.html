@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 {% load static %}
-{% block title %}尚硅谷书店-首页{% endblock title %}
+{% block title %}珞珈线上书店-首页{% endblock title %}
 {% block topfiles %}
 {% endblock topfiles %}
 {% block body %}
@@ -9,18 +9,18 @@
         <div class="left_menu_con clearfix">
             <h3>用户中心</h3>
             <ul>
-                <li><a href="{% url 'user:user' %}">· 个人信息</a></li>
-                <li><a href="{% url 'user:order' %}" class="active">· 全部订单</a></li>
-                <li><a href="{% url 'user:address' %}">· 收货地址</a></li>
+                <li><a href="{% url 'user:detail' %}">· 个人信息</a></li>
+                <li><a href="{% url 'order:all' %}" class="active">· 全部订单</a></li>
+                <li><a href="{% url 'user:detail' %}">· 收货地址</a></li>
             </ul>
         </div>
         <div class="right_content clearfix">
                 {% csrf_token %}
                 <h3 class="common_title2">全部订单</h3>
                 {# OrderInfo #}
-                {% for order in order_li %}
+                {% for order in all_list %}
                 <ul class="order_list_th w978 clearfix">
-                    <li class="col01">{{ order.create_time }}</li>
+                    <li class="col01">{{ order.time_submit }}</li>
                     <li class="col02">订单号：{{ order.order_id }}</li>
                     <li class="col02 stress">{{ order.status }}</li>
                 </ul>

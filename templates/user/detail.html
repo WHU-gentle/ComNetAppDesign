@@ -17,14 +17,10 @@
                 <div class="info_con clearfix">
                 <h3 class="common_title2">基本信息</h3>
                         <ul class="user_info_list">
-                            <li><span>用户名：</span>{{ request.session.username }}</li>
-                            {% if addr %}
-                                <li><span>联系方式：</span>{{ addr.recipient_phone }}</li>
-                                <li><span>联系地址：</span>{{ addr.recipient_addr }}</li>
-                            {% else %}
-                                <li><span>联系方式：</span>无</li>
-                                <li><span>联系地址：</span>无</li>
-                            {% endif %}
+                            <li><span>用户名：</span>{{ user_name }}</li>
+                            <li><span>联系方式：</span>{{ phone_number }}</li>
+                            <li><span>电子邮箱:</span>{{ email }}</li>
+                            <li><span>注册日期：</span>{{ register_date }}</li>
                         </ul>
                 </div>
 
