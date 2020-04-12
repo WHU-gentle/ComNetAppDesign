@@ -10,7 +10,7 @@
 
     $(function() {
     update_cart_count() //书籍总数
-    update_total_price() //书籍总价
+    update_total_price_checked() //书籍总价
     function update_cart_count() {
         //  更新列表上方商品总数
         $.get('/book/count/', function (data) {
@@ -19,27 +19,35 @@
     }
 
     // 计算所有被选中商品的总价，总数目和商品的小计
-    function update_total_price() {
+    function update_total_price_checked() {
         total_count = 0
         total_price = 0
-        // 获取所有被选中的商品所在的ul元素
-        $('.cart_list_td').find(':checked').parents('ul').each(function () {
+        total_checked = true
+        // 获取所有无论是否选中的商品所在的ul元素
+        $('.cart_list_td').each(function () {
             // 计算商品的小计
             res_dict = update_book_price($(this))
 
             total_count += res_dict.book_count
             total_price += res_dict.book_amount
+            total_checked = total_checked && res_dict.book_checked
         })
         // 设置商品的总价和总数目
         $('.settlements').find('em').text(total_price.toFixed(2))
         $('.settlements').find('b').text(total_count)
+        // 更新选择框状态
+        $('.settlements').find(":checkbox").prop('checked', total_checked)
+        console.log(total_checked)
     }
 
     function update_book_price(book_ul) {
+        book_checked = book_ul.find('input').prop("checked")
         // 获取每一个商品的价格和数量
         book_price = book_ul.children('.col05').text()
         book_count = book_ul.find('.num_show').val()
 
+        console.log(book_checked)
+        console.log(book_price)
         // 计算商品的小计
         book_price = parseFloat(book_price)
         book_count = parseInt(book_count)
@@ -47,7 +55,8 @@
 
         return {
             'book_count': book_count,
-            'book_amount': book_amount
+            'book_amount': book_amount,
+            'book_checked': book_checked
         }
     }
 
@@ -65,15 +74,10 @@
                 // 删除成功
                 // 移除商品对应的ul元素
                 book_ul.remove()
-                // 判断商品对应的checkbox是否选中
-                is_checked = book_ul.find(':checkbox').prop('checked')
-                if (is_checked){
-                    update_total_price()
-                }
+                // 更新总价和总选中
+                update_total_price_checked()
                 // 更新页面购物车商品总数
                 update_cart_count()
-                // 更新选择框状态
-                $('.settlements').find(":checkbox").prop('checked', false)
             }
         })
     })
@@ -100,12 +104,8 @@
                 // 判断商品对应的checkbox是否选中
                 is_checked = book_ul.find(':checkbox').prop('checked')
                 if (is_checked){
-                    update_total_price()
+                    update_total_price_checked()
                 }
-                // 更新页面购物车商品总数
-                update_cart_count()
-                // 更新选择框状态
-                $('.settlements').find(":checkbox").prop('checked', false)
             }
         })
     })
@@ -132,19 +132,32 @@
                     // 减为0
                     // 移除商品对应的ul元素
                     book_ul.remove()
+                    // 更新页面购物车商品总数
+                    update_cart_count()
                 }else{
                     // 修改当前数量
                     book_ul.find('.num_show').attr('value', book_num)
                 }
-                // 判断商品对应的checkbox是否选中
-                is_checked = book_ul.find(':checkbox').prop('checked')
-                if (is_checked){
-                    update_total_price()
-                }
-                // 更新页面购物车商品总数
-                update_cart_count()
-                // 更新选择框状态
-                $('.settlements').find(":checkbox").prop('checked', false)
+                update_total_price_checked()
+            }
+        })
+    })
+
+
+    $('.col01 input').click(function () {
+        // 反转选中状态
+        book_ul = $(this).parents('ul')
+        book_id = book_ul.find('.num_show').attr('book_id')
+        csrf = $('input[name="csrfmiddlewaretoken"]').val()
+        params = {
+            "book_id": book_id,
+            "csrfmiddlewaretoken": csrf
+        }
+        $.get('/book/select/', params, function (data) {
+            if (data.res == 1){
+                // 反转成功
+                // 更新总价选择框状态
+                update_total_price_checked()
             }
         })
     })
@@ -168,7 +181,7 @@
     {% for cart in cart_list %}
     <ul class="cart_list_td clearfix">
         {# 提交表单时，如果checkbox没有被选中，它的值不会被提交 #}
-        <li class="col01"><input type="checkbox" name="book_id" value="{{ cart.book_id }}" checked></li>
+        <li class="col01"><input type="checkbox" name="book_id" value="{{ cart.book_id }}" {% if cart.select %} checked {% endif %}></li>
         <li class="col02"><a href="../../book/detail/{{ cart.book_id }}"><img src="{% static cart.book.book_picture %}" alt=""></a></li>
         <li class="col03">{{ cart.book.book_name }}<br><em>{{ cart.book.price }}元</em></li>
         <li class="col04">{{ cart.book.author }}</li>
