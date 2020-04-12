@@ -20,6 +20,6 @@ urlpatterns = [
     # 购物车书选中状态反转
     path('select/', views.select, name='select'),
     # 获取用户购物车中商品的数量
-    #path('count/', views.cart_count, name='count'),
+    path('count/', views.count, name='count'),
     #path('update/', views.cart_update, name="update"),
 ]

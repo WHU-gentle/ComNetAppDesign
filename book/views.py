@@ -124,7 +124,6 @@ def buy(request):
     return JsonResponse({'res': 1, 'msg':'您成功添加了'+str(number)+'本'+str(book.book_name)})
 
 
-
 # 删除用户购物车中商品的信息
 def cancel(request):
     try:
@@ -156,6 +155,12 @@ def set_number(request):
 
     if number is None:
         raise Exception('未设置set_number数量')
+
+    if number < 0:
+        raise Exception('书籍数量不为负')
+
+    if number == 0:
+        return cancel(request)
 
     try:
         now = Cart.objects.get(user_id=request.session['user']['user_id'], book_id=book_id)
@@ -200,3 +205,10 @@ def select(request):
         Cart.objects.filter(user_id=request.session['user']['user_id'], book_id=book_id).update(select=not now.select)
     return JsonResponse({'res': 1})
 
+
+def count(request):
+    if request.session.get('islogin', False):
+        cart_list = Cart.objects.filter(user_id=request.session['user']['user_id'])
+        return JsonResponse({'res': len(cart_list)})
+    else:
+        return JsonResponse({'res': -1})

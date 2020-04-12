@@ -14,7 +14,7 @@
     function update_cart_count() {
         //  更新列表上方商品总数
         $.get('/book/count/', function (data) {
-            $('.total_count').children('em').text()
+            $('.total_count').children('em').text(data.res)
         })
     }
 
@@ -51,7 +51,7 @@
         }
     }
 
-    $('.cart_list_td').children('.col08').children('a').click(function () {
+    $('.del_btn').click(function () {
         // 获取删除的商品的id
         book_ul = $(this).parents('ul')
         book_id = book_ul.find('.num_show').attr('book_id')
@@ -60,8 +60,7 @@
             "book_id": book_id,
             "csrfmiddlewaretoken": csrf
         }
-        // 访问/cart/cancel/
-        $.post('/cart/cancel/', params, function (data) {
+        $.get('/book/cancel/', params, function (data) {
             if (data.res == 1){
                 // 删除成功
                 // 移除商品对应的ul元素
@@ -77,6 +76,78 @@
                 $('.settlements').find(":checkbox").prop('checked', false)
             }
         })
+    })
+
+    $('.add').click(function () {
+        // 获取增加的商品的id
+        book_ul = $(this).parents('ul')
+        book_id = book_ul.find('.num_show').attr('book_id')
+        book_num = Number(book_ul.find('.num_show').attr('value'))+1
+        if(!Number.isInteger(book_num)) {
+            return
+        }
+        csrf = $('input[name="csrfmiddlewaretoken"]').val()
+        params = {
+            "book_id": book_id,
+            'number': book_num,
+            "csrfmiddlewaretoken": csrf
+        }
+        $.get('/book/set_number/', params, function (data) {
+            if (data.res == 1){
+                // 加一成功
+                // 修改当前数量
+                book_ul.find('.num_show').attr('value', book_num)
+                // 判断商品对应的checkbox是否选中
+                is_checked = book_ul.find(':checkbox').prop('checked')
+                if (is_checked){
+                    update_total_price()
+                }
+                // 更新页面购物车商品总数
+                update_cart_count()
+                // 更新选择框状态
+                $('.settlements').find(":checkbox").prop('checked', false)
+            }
+        })
+    })
+
+
+    $('.minus').click(function () {
+        // 获取增加的商品的id
+        book_ul = $(this).parents('ul')
+        book_id = book_ul.find('.num_show').attr('book_id')
+        book_num = Number(book_ul.find('.num_show').attr('value'))-1
+        if(!Number.isInteger(book_num)) {
+            return
+        }
+        csrf = $('input[name="csrfmiddlewaretoken"]').val()
+        params = {
+            "book_id": book_id,
+            'number': book_num,
+            "csrfmiddlewaretoken": csrf
+        }
+        $.get('/book/set_number/', params, function (data) {
+            if (data.res == 1){
+                // 减一成功
+                if(book_num==0) {
+                    // 减为0
+                    // 移除商品对应的ul元素
+                    book_ul.remove()
+                }else{
+                    // 修改当前数量
+                    book_ul.find('.num_show').attr('value', book_num)
+                }
+                // 判断商品对应的checkbox是否选中
+                is_checked = book_ul.find(':checkbox').prop('checked')
+                if (is_checked){
+                    update_total_price()
+                }
+                // 更新页面购物车商品总数
+                update_cart_count()
+                // 更新选择框状态
+                $('.settlements').find(":checkbox").prop('checked', false)
+            }
+        })
+    })
     })
 
 
@@ -110,7 +181,7 @@
             </div>
         </li>
         <li class="col07">{{ cart.book.press }}</li>
-        <li class="col08"><a href="javascript:" id="{{ cart.book_id }}">删除</a></li>
+        <li class="col08"><a href="javascript:" class="del_btn" id="{{ cart.book_id }}">删除</a></li>
     </ul>
     {% endfor %}
 
