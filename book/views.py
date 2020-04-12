@@ -59,7 +59,8 @@ def kind(request, kind_id):
 def sort_by(book):
     return book.sales
 
-def search(request, keyword):
+def search(request):
+    keyword = request.POST.get('keyword')
     bookList = Book.objects.filter(Q(book_name__contains=keyword) | Q(author__contains=keyword) | Q(press__contains=keyword))
     bookList.sort(key=sort_by, reverse=True)
 

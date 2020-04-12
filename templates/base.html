@@ -67,6 +67,26 @@ line-height:100px;
 	margin:0 auto 20px;
 }
 
+.user_info_list1{
+	background-color:#f9f9f9;
+	margin:10px 0 15px;
+	padding:10px 0;
+	height:120px;
+}
+
+.user_info_list1 li{
+	line-height:30px;
+	text-indent:30px;
+	font-size:14px;
+}
+
+.user_info_list1 li span{
+	width:100px;
+	float:left;
+	text-align:right;
+}
+
+
 </style>
 
     {% block topfiles %}
@@ -110,8 +130,8 @@ line-height:100px;
     <div class="search_bar clearfix">
         <a href="{% url 'index' %}" class="logo fl"> <img src="{% static 'images/logo.png' %}" style="width: 160px; height: 53px;"> </a>
         <div class="search_con fl">
-            <form method='get' action="#" target="_blank">
-                <input type="text" class="input_text fl" name="q" placeholder="search">
+            <form method='post' action='book/search/' target="_blank">{% csrf_token %}
+                <input type="text" class="input_text fl" name="keyword" placeholder="search">
                 <input type="submit"  class="input_btn fr" value="查询">
             </form>
         </div>

@@ -408,7 +408,7 @@ def super_bookCreate(request):
         description=description,
         sales=sales
     )
-    return JsonResponse({'msg':"sucess"})
+    return JsonResponse({'msg':"success"})
 
 def super_user(request, pageid):
     pass
