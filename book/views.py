@@ -55,14 +55,10 @@ def kind(request, kind_id):
         books.append(book_detail)
     return render(request, 'book/kind.html', {'books': books, 'kind_name': kind_name})
 
-
-def sort_by(book):
-    return book.sales
-
 def search(request):
     keyword = request.POST.get('keyword')
-    bookList = Book.objects.filter(Q(book_name__contains=keyword) | Q(author__contains=keyword) | Q(press__contains=keyword))
-    bookList.sort(key=sort_by, reverse=True)
+    bookList = Book.objects.filter(Q(book_name__contains=keyword) | Q(author__contains=keyword) | Q(press__contains=keyword))\
+                            .order_by('-sales')
 
     books = []
     for book in bookList:
