@@ -125,7 +125,7 @@ def buy(request):
 
 
 
-# 用户将同种所有书移出购物车
+# 删除用户购物车中商品的信息
 def cancel(request):
     try:
         book_id = int(request.GET.get('book_id'))
@@ -199,3 +199,4 @@ def select(request):
         # 之前存在,状态反转
         Cart.objects.filter(user_id=request.session['user']['user_id'], book_id=book_id).update(select=not now.select)
     return JsonResponse({'res': 1})
+
