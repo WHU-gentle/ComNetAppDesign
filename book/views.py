@@ -63,6 +63,7 @@ def search(request):
     books = []
     for book in bookList:
         book_detail = {
+            'id': book.book_id,
             'name': book.book_name,
             'picture': book.book_picture,
             'price': book.price,
