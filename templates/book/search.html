@@ -4,16 +4,20 @@
 {% block topfiles %}
 {% endblock topfiles %}
 {% block body %}
-    <div>
-        <div>
-            {% for book in books %}
-                <div>
-                    <a href="../../detail/{{ book.id }}">
+
+
+    <div class='book_kind_con'>
+        <div class='con'>
+            {% if books is not none %}
+                {% for book in books %}
+                    <div>
+                    <a href="../detail/{{ book.id }}">
                     <img src="{% static book.picture %}" height="140" width="100">
                     </a>
-                </div>
-             {% endfor %}
+                    </div>
+                {% endfor %}
+            {% endif %}
         </div>
-
     </div>
+
 {% endblock body %}

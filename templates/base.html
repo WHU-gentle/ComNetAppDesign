@@ -130,8 +130,8 @@ line-height:100px;
     <div class="search_bar clearfix">
         <a href="{% url 'index' %}" class="logo fl"> <img src="{% static 'images/logo.png' %}" style="width: 160px; height: 53px;"> </a>
         <div class="search_con fl">
-            <form method='post' action='book/search/' target="_blank">{% csrf_token %}
-                <input type="text" class="input_text fl" name="keyword" placeholder="search">
+            <form method='post' action='http://127.0.0.1:8000/book/search/' target="_blank">{% csrf_token %}
+                <input type="text" required="required" class="input_text fl" name="keyword" placeholder="search">
                 <input type="submit"  class="input_btn fr" value="查询">
             </form>
         </div>
