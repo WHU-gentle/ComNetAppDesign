@@ -1,5 +1,5 @@
 from django.forms import model_to_dict
-from django.http import JsonResponse, Http404, HttpResponseRedirect 
+from django.http import JsonResponse, Http404, HttpResponseRedirect
 from django.shortcuts import render, redirect
 
 # Create your views here.
@@ -13,7 +13,7 @@ import datetime
 
 def all(request):
     user_id = request.session['user']['user_id']
-    #all_list = [model_to_dict(order) for order in Order.objects.filter(user_id=user_id, status=[s for s in range(0,5)])]
+    # all_list = [model_to_dict(order) for order in Order.objects.filter(user_id=user_id, status=[s for s in range(0,5)])]
     cancel_list = [model_to_dict(order) for order in Order.objects.filter(user_id=user_id, status=0)]
     unpaid_list = [model_to_dict(order) for order in Order.objects.filter(user_id=user_id, status=1)]
     unsent_list = [model_to_dict(order) for order in Order.objects.filter(user_id=user_id, status=2)]
@@ -25,7 +25,7 @@ def all(request):
         'unsent_list': unsent_list,
         'unreceived_list': unreceived_list,
         'finished_list': finished_list,
-        #'all_list': all_list
+        # 'all_list': all_list
     }
     # 因为没有对应前端，先返回成json
     return render(request, 'order/all.html', content)
@@ -43,6 +43,8 @@ def detail(request, order_id):
 
     # object 转 dict
     content['order'] = model_to_dict(order)
+    # 计算总付款数=总价+运费
+    content['order']['all_price'] = content['order']['sum_price'] + 10
 
     # 订单中书籍的信息
     content['order_content'] = []
@@ -52,7 +54,7 @@ def detail(request, order_id):
             'id': book.order_id,
             'book_id': book.book_id,
             'number': book.number,
-            'price': book.price,  # 此处是同种书的总价
+            'price': book.price * book.number,  # 小计：可能不只一本同种书的总价
         }
         try:
             book = Book.objects.get(book_id=book.book_id)
@@ -86,7 +88,7 @@ def new(request):
     )
     order.save()
 
-    #print(order.order_id)
+    # print(order.order_id)
 
     sum_price = 0.0
     for book in Cart.objects.filter(
@@ -106,8 +108,9 @@ def new(request):
         select=True,
     ).delete()
     # order.save()
-    #return JsonResponse({'res': 1, 'order_id':order.order_id})
+    # return JsonResponse({'res': 1, 'order_id':order.order_id})
     return detail(request, order.order_id)
+
 
 def receive(request):
     try:
