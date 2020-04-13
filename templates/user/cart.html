@@ -27,9 +27,10 @@
         $('.cart_list_td').each(function () {
             // 计算商品的小计
             res_dict = update_book_price($(this))
-
-            total_count += res_dict.book_count
-            total_price += res_dict.book_amount
+            if(res_dict.book_checked) {// 只计算选中商品的价格、数量
+                total_count += res_dict.book_count
+                total_price += res_dict.book_amount
+            }
             total_checked = total_checked && res_dict.book_checked
         })
         // 设置商品的总价和总数目
@@ -37,7 +38,6 @@
         $('.settlements').find('b').text(total_count)
         // 更新选择框状态
         $('.settlements').find(":checkbox").prop('checked', total_checked)
-        console.log(total_checked)
     }
 
     function update_book_price(book_ul) {
@@ -46,8 +46,6 @@
         book_price = book_ul.children('.col05').text()
         book_count = book_ul.find('.num_show').val()
 
-        console.log(book_checked)
-        console.log(book_price)
         // 计算商品的小计
         book_price = parseFloat(book_price)
         book_count = parseInt(book_count)
@@ -143,8 +141,8 @@
         })
     })
 
-
-    $('.col01 input').click(function () {
+    // 点击复选框效果
+    $('.cart_list_td .col01 input').click(function () {
         // 反转选中状态
         book_ul = $(this).parents('ul')
         book_id = book_ul.find('.num_show').attr('book_id')
@@ -160,6 +158,23 @@
                 update_total_price_checked()
             }
         })
+    })
+
+    // 点击全选复选框效果
+    $('.settlements .col01 input').click(function () {
+        // 点击全选
+        total_checked = $(this).prop('checked')
+        $('.cart_list_td').each(function () {
+            // 计算商品的小计
+            checked = $(this).find('.col01 input').prop("checked")
+            if(checked != total_checked){
+                // 与当前（点击后）全选状态不同的都模拟点击一次
+                $(this).find('.col01 input').click()
+            }
+        })
+        $(this).prop('checked', !total_checked)
+
+        update_total_price_checked()
     })
     })
 
