@@ -68,7 +68,7 @@
             "csrfmiddlewaretoken": csrf
         }
         $.get('/book/cancel/', params, function (data) {
-            if (data.res == 1){
+            if (data.res === 1){
                 // 删除成功
                 // 移除商品对应的ul元素
                 book_ul.remove()
@@ -95,7 +95,7 @@
             "csrfmiddlewaretoken": csrf
         }
         $.get('/book/set_number/', params, function (data) {
-            if (data.res == 1){
+            if (data.res === 1){
                 // 加一成功
                 // 修改当前数量
                 book_ul.find('.num_show').attr('value', book_num)
@@ -124,9 +124,9 @@
             "csrfmiddlewaretoken": csrf
         }
         $.get('/book/set_number/', params, function (data) {
-            if (data.res == 1){
+            if (data.res === 1){
                 // 减一成功
-                if(book_num==0) {
+                if(book_num===0) {
                     // 减为0
                     // 移除商品对应的ul元素
                     book_ul.remove()
@@ -152,7 +152,7 @@
             "csrfmiddlewaretoken": csrf
         }
         $.get('/book/select/', params, function (data) {
-            if (data.res == 1){
+            if (data.res === 1){
                 // 反转成功
                 // 更新总价选择框状态
                 update_total_price_checked()
@@ -167,7 +167,7 @@
         $('.cart_list_td').each(function () {
             // 计算商品的小计
             checked = $(this).find('.col01 input').prop("checked")
-            if(checked != total_checked){
+            if(checked !== total_checked){
                 // 与当前（点击后）全选状态不同的都模拟点击一次
                 $(this).find('.col01 input').click()
             }
