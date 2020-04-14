@@ -55,9 +55,9 @@ $(function () {
             $.get('/book/buy/', params, function (data) {
                 if (data.res == 1){
                     // 添加成功
-                    var count = $('#show_count').html();
-                    var count = parseInt(count) + parseInt(book_count);
-                    $('#show_count').html(count);
+                    var bookName = "{{ book.name }}"
+                    var msg = "您已成功添加" + String(book_count) + "本" + "《" + bookName + "》"
+                    alert(msg)
                 } else if(data.res==0){
                     // 添加失败
                     alert(data.errmsg)
@@ -72,11 +72,11 @@ $(function () {
 {% block body %}
 
     <div class="breadcrumb">
-        <a href="#">全部分类</a>
+        <a href="../../../">全部分类</a>
         <span>></span>
-        <a href="#">{{ book.kind_name }}</a>
+        <a href="../../kind/{{book.kind_id}}">{{ book.kind_name }}</a>
         <span>></span>
-        <a href="#">商品详情</a>
+        <a href="">商品详情</a>
     </div>
 
     <div class="book_detail_con clearfix">

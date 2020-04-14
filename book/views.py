@@ -123,6 +123,15 @@ def buy(request):
             .update(number=now.number + number)
     return JsonResponse({'res': 1, 'msg':'您成功添加了'+str(number)+'本'+str(book.book_name)})
 
+# 立即购买
+def bugNow(request):
+    try:
+        book_id = int(request.GET.get('book_id'))
+        number = int(request.GET.get('number', 1))
+    except ValueError:
+        # 商品数目不合法
+        return JsonResponse({'res': 0, 'errmsg': '商品数量必须为数字'})
+    
 
 # 删除用户购物车中商品的信息
 def cancel(request):

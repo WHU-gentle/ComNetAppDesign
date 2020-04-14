@@ -13,19 +13,25 @@ import datetime
 
 def all(request):
     user_id = request.session['user']['user_id']
-    # all_list = [model_to_dict(order) for order in Order.objects.filter(user_id=user_id, status=[s for s in range(0,5)])]
-    cancel_list = [model_to_dict(order) for order in Order.objects.filter(user_id=user_id, status=0)]
-    unpaid_list = [model_to_dict(order) for order in Order.objects.filter(user_id=user_id, status=1)]
-    unsent_list = [model_to_dict(order) for order in Order.objects.filter(user_id=user_id, status=2)]
-    unreceived_list = [model_to_dict(order) for order in Order.objects.filter(user_id=user_id, status=3)]
-    finished_list = [model_to_dict(order) for order in Order.objects.filter(user_id=user_id, status=4)]
+    dict = {0: "已取消", 1: "待付款", 2: "待发货", 3: "已发货", 4: "已完成"}
+    all_list = []
+    for s in range(0, 5):
+        for order in Order.objects.filter(user_id=user_id, status=s):
+            order = model_to_dict(order)
+            order['status'] = dict[order['status']]
+            all_list.append(order)
+    #cancel_list = [model_to_dict(order) for order in Order.objects.filter(user_id=user_id, status=0)]
+    #unpaid_list = [model_to_dict(order) for order in Order.objects.filter(user_id=user_id, status=1)]
+    #unsent_list = [model_to_dict(order) for order in Order.objects.filter(user_id=user_id, status=2)]
+    #unreceived_list = [model_to_dict(order) for order in Order.objects.filter(user_id=user_id, status=3)]
+    #finished_list = [model_to_dict(order) for order in Order.objects.filter(user_id=user_id, status=4)]
     content = {
-        'cancel_list': cancel_list,
-        'unpaid_list': unpaid_list,
-        'unsent_list': unsent_list,
-        'unreceived_list': unreceived_list,
-        'finished_list': finished_list,
-        # 'all_list': all_list
+        #'cancel_list': cancel_list,
+        #'unpaid_list': unpaid_list,
+        #'unsent_list': unsent_list,
+        #'unreceived_list': unreceived_list,
+        #'finished_list': finished_list,
+        'all_list': all_list
     }
     # 因为没有对应前端，先返回成json
     return render(request, 'order/all.html', content)
