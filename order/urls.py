@@ -16,5 +16,5 @@ urlpatterns = [
     # 订单支付宝支付
     path('alipay_pay/', views.alipay_pay, name='alipay_pay'),
     # 回调通知标签
-    # path('pay_result/', views.pay_result, name='pay_result'),
+    path('alipay_query/', views.alipay_query, name='alipay_query'),
 ]

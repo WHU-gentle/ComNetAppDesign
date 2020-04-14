@@ -152,7 +152,7 @@ alipayClient = AliPay(
 def alipay_pay(request):
     global alipayClient
 
-    out_trade_no = request.GET.get('order_id')  # 555 开始
+    out_trade_no = request.GET.get('order_id')
     if out_trade_no is None:
         print('无order_id')
         return
@@ -197,3 +197,28 @@ def alipay_pay(request):
     img.save(buf, 'png')
     # 将内存中的图片数据返回给客户端，MIME类型为图片png
     return HttpResponse(buf.getvalue(), 'image/png')
+
+
+def alipay_query(request):
+    global alipayClient
+
+    out_trade_no = request.GET.get('order_id')
+    result = alipayClient.api_alipay_trade_query(out_trade_no=out_trade_no)
+    print('订单查询返回值：', result)
+    if result.get('code', '') == '40004':
+        if result.get('sub_code', '') == 'ACQ.TRADE_NOT_EXIST':
+            # 用户未扫码，支付宝订单未创建
+            return JsonResponse({'res': 1, 'status': 1})
+        else:
+            # 调用失败
+            return JsonResponse({'res': 0})
+    elif result.get('code', '') == '10000':
+        if result.get("trade_status", "") == "WAIT_BUYER_PAY":
+            # 用户扫码，未支付
+            return JsonResponse({'res': 1, 'status': 1})
+        elif result.get("trade_status", "") == "TRADE_SUCCESS":
+            # 用户已支付
+            return JsonResponse({'res': 1, 'status': 2})
+        elif result.get("trade_status", "") == "TRADE_CLOSED":
+            # 用户超时未支付
+            return JsonResponse({'res': 1, 'status': 0})
