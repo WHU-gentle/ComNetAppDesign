@@ -1,3 +1,5 @@
+import io
+
 from django.forms import model_to_dict
 from django.http import JsonResponse, Http404, HttpResponseRedirect, HttpResponse
 from django.shortcuts import render, redirect
@@ -7,17 +9,14 @@ from book.models import Book
 from user.models import Cart
 from order.models import Order, OrderContent
 from django.core import serializers
+from bookstore import settings
 
 import datetime
 
-from alipay.aop.api.AlipayClientConfig import AlipayClientConfig  # 客户端配置类
-from alipay.aop.api.DefaultAlipayClient import DefaultAlipayClient  # 默认客户端类
-from alipay.aop.api.domain.AlipayTradePagePayModel import AlipayTradePagePayModel  # 网站支付数据模型类
-from alipay.aop.api.request.AlipayTradePagePayRequest import AlipayTradePagePayRequest  # 网站支付请求类
-from django.conf import settings
-import random
+from alipay import AliPay  # https://blog.csdn.net/appleyuchi/article/details/104613313
+import qrcode, time
+import urllib
 
-from alipay.aop.api.util.SignatureUtils import verify_with_rsa
 
 def all(request):
     user_id = request.session['user']['user_id']
@@ -140,67 +139,61 @@ def receive(request):
         return JsonResponse({'res': 0, 'errmsg': '订单不可收货'})
 
 
-def to_pay(request):
-    alipay_client_config = AlipayClientConfig()  # 创建配置对象
-    alipay_client_config.server_url = settings.ALIPAY_URL  # 网关
-    alipay_client_config.app_id = settings.ALIPAY_APPID  # APPID
-    alipay_client_config.app_private_key = settings.APP_PRIVATE_KEY  # 应用私钥
-    client = DefaultAlipayClient(alipay_client_config=alipay_client_config)  # 使用配置创建客户端
-    model = AlipayTradePagePayModel()  # 创建网站支付模型
-    model.out_trade_no = str(request.GET['order_id'])  # 商户订单号码
-    model.total_amount = float(request.GET['all_price'])  # 支付总额
-    # model.subject = request.GET['goods_name']  # 订单标题
-    # model.body = '一套完整详细的Python入门视频。'  # 订单描述
-    model.product_code = 'FAST_INSTANT_TRADE_PAY'  # 与支付宝签约的产品码名称，目前只支持这一种。
-    model.timeout_express = '30m'  # 订单过期关闭时长（分钟）
-    pay_request = AlipayTradePagePayRequest(biz_model=model)  # 通过模型创建请求对象
-    pay_request.notify_url = settings.ALIPAY_NOTIFY_URL  # 设置回调通知地址（POST）
-    pay_request.return_url = settings.ALIPAY_RETURN_URL # 设置回调通知地址（GET）
-
-    response = client.page_execute(pay_request, http_method='GET')  # 获取支付链接
-    return HttpResponseRedirect(response)  # 重定向到支付宝支付页面
+alipayClient = AliPay(
+    appid=settings.APP_ID,
+    app_notify_url=None,
+    app_private_key_string=settings.APP_PRIVATE_KEY,
+    alipay_public_key_string=settings.ALIPAY_PUBLIC_KEY,
+    sign_type='RSA2',
+    debug=settings.DEBUG,
+)
 
 
-def check_pay(params):  # 定义检查支付结果的函数
-    sign = params.pop('sign', None)  # 取出签名
-    params.pop('sign_type')  # 取出签名类型
-    params = sorted(params.items(), key=lambda e: e[0], reverse=False)  # 取出字典元素按key的字母升序排序形成列表
-    message = "&".join(u"{}={}".format(k, v) for k, v in params).encode()  # 将列表转为二进制参数字符串
-    # with open(settings.ALIPAY_PUBLIC_KEY_PATH, 'rb') as public_key: # 打开公钥文件
+def alipay_pay(request):
+    global alipayClient
+
+    out_trade_no = request.GET.get('order_id')  # 555 开始
+    if out_trade_no is None:
+        print('无order_id')
+        return
     try:
-        #     status =verify_with_rsa(public_key.read().decode(),message,sign) # 验证签名并获取结果
-        status = verify_with_rsa(settings.ALIPAY_PUBLIC_KEY.encode('utf-8').decode('utf-8'), message,
-                                 sign)  # 验证签名并获取结果
-        return status  # 返回验证结果
-    except:  # 如果验证失败，返回假值。
-        return False
+        order_id = int(out_trade_no)
+    except ValueError:
+        print('order_id非整数')
+        return
 
+    if settings.DEBUG:
+        out_trade_no += ('__%s' % datetime.datetime.now()).split('.')[0].replace(' ', '_').replace('-', '_').replace(':', '_')
+        print(out_trade_no)
+    try:
+        order = Order.objects.get(order_id=order_id)
+    except Order.DoesNotExist:
+        # 订单不存在
+        print('order_id 订单不存在')
+        return
+    except Order.MultipleObjectsReturned:
+        raise Exception('订单表错误')
 
-def pay_result(request):  # 定义处理回调通知的函数
-    # 调用成功
-    if request.method == 'GET':
-        params = request.GET.dict()  # 获取参数字典
-        if check_pay(params):  # 调用检查支付结果的函数
-            return HttpResponse('调用成功！')
-        else:
-            return HttpResponse('调用失败！')
+    # 书籍总价加运费
+    total_amount = order.sum_price + 10.00
+    subject = '珞珈在线书店订单 %s' % order.time_submit
+    timeout_express = '30m'
+    try:
+        dict = alipayClient.api_alipay_trade_precreate(out_trade_no=out_trade_no, total_amount=total_amount,
+                                                       subject=subject, timeout_express=timeout_express)
+    except urllib.error.URLError:
+        raise Exception('网络已断开')
 
-    # 支付成功
-    if request.method == 'POST':
-        params = request.POST.dict()  # 获取参数字典
-        if check_pay(params):  # 调用检查支付结果的函数
-            '''
-                此处编写支付成功后的业务逻辑
-            '''
-            order_id = int(params['alipay_trade_page_pay_response']['out_trade_no'])
-            Order.objects.filter(order_id=order_id).update(
-                status=2,
-                time_pay=datetime.datetime.now(),
-            )
-            # print('支付成功！')
-            return HttpResponse('success')  # 返回成功信息到支付宝服务器
-        else:
-            '''
-                此处编写支付失败后的业务逻辑
-            '''
-            return HttpResponse('')
+    qr = qrcode.QRCode(
+        version=1,
+        error_correction=qrcode.constants.ERROR_CORRECT_H,
+        box_size=10,
+        border=1
+    )
+    qr.add_data(dict['qr_code'])  # 从URL获取二维码所含信息
+    img = qr.make_image()  # 生成二维码图片
+    buf = io.BytesIO()
+    # 将图片保存在内存中，文件类型为png
+    img.save(buf, 'png')
+    # 将内存中的图片数据返回给客户端，MIME类型为图片png
+    return HttpResponse(buf.getvalue(), 'image/png')
