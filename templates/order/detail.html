@@ -62,7 +62,7 @@
     </div>
 
     <div class="order_submit clearfix">
-        <a href="javascript:;" id="order_btn" books_ids="{{ books_ids }}">提交订单</a>
+        <a href="{% url 'order:to_pay' %}/?all_price={{ order.all_price }}&order_id={{ order.order_id }}" id="order_btn">提交订单</a>
     </div>
 {% endblock body %}
 {% block bottom %}

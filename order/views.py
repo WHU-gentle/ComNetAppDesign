@@ -1,5 +1,7 @@
+import io
+
 from django.forms import model_to_dict
-from django.http import JsonResponse, Http404, HttpResponseRedirect
+from django.http import JsonResponse, Http404, HttpResponseRedirect, HttpResponse
 from django.shortcuts import render, redirect
 
 # Create your views here.
@@ -7,8 +9,13 @@ from book.models import Book
 from user.models import Cart
 from order.models import Order, OrderContent
 from django.core import serializers
+from bookstore import settings
 
 import datetime
+
+from alipay import AliPay  # https://blog.csdn.net/appleyuchi/article/details/104613313
+import qrcode, time
+import urllib
 
 
 def all(request):
@@ -136,3 +143,115 @@ def receive(request):
         return JsonResponse({'res': 1})
     else:
         return JsonResponse({'res': 0, 'errmsg': '订单不可收货'})
+
+
+alipayClient = AliPay(
+    appid=settings.APP_ID,
+    app_notify_url=None,
+    app_private_key_string=settings.APP_PRIVATE_KEY,
+    alipay_public_key_string=settings.ALIPAY_PUBLIC_KEY,
+    sign_type='RSA2',
+    debug=settings.DEBUG,
+)
+
+
+def alipay_pay(request):
+    global alipayClient
+
+    out_trade_no = request.GET.get('order_id')
+    if out_trade_no is None:
+        print('无order_id')
+        return
+    try:
+        order_id = int(out_trade_no)
+    except ValueError:
+        print('order_id非整数')
+        return
+
+    if settings.DEBUG:
+        # 调试时因为支付宝服务器记录已被扫码的订单状态，每次模拟一个新订单进行调试
+        out_trade_no += ('__%s' % datetime.datetime.now()).split('.')[0].replace(' ', '_').replace('-', '_').replace(':', '_')
+        print(out_trade_no)
+
+    try:
+        order = Order.objects.get(order_id=order_id)
+    except Order.DoesNotExist:
+        # 订单不存在
+        print('order_id 订单不存在')
+        return
+    except Order.MultipleObjectsReturned:
+        raise Exception('订单表错误')
+
+    # 书籍总价加运费
+    total_amount = order.sum_price + 10.00
+    subject = '珞珈在线书店订单 %s' % order.time_submit
+    timeout_express = '30m'
+    try:
+        dict = alipayClient.api_alipay_trade_precreate(out_trade_no=out_trade_no, total_amount=total_amount,
+                                                       subject=subject, timeout_express=timeout_express)
+    except urllib.error.URLError:
+        raise Exception('网络已断开')
+
+    # https://www.cnblogs.com/linjiqin/p/4140455.html
+    qr = qrcode.QRCode(
+        version=1,
+        error_correction=qrcode.constants.ERROR_CORRECT_H,
+        box_size=2,  # 图片尽可能小，但足以识别（结果一般为86*86像素）
+        border=1
+    )
+    qr.add_data(dict['qr_code'])  # 从URL获取二维码所含信息
+    img = qr.make_image()  # 生成二维码图片
+    buf = io.BytesIO()
+    # 将图片保存在内存中，文件类型为png
+    img.save(buf, 'png')
+    # 将内存中的图片数据返回给客户端，MIME类型为图片png
+    return HttpResponse(buf.getvalue(), 'image/png')
+
+
+def alipay_query(request):
+    global alipayClient
+
+    out_trade_no = request.GET.get('order_id')
+    result = alipayClient.api_alipay_trade_query(out_trade_no=out_trade_no)
+    print('订单查询返回值：', result)
+    try:
+        if settings.DEBUG:
+            order_id = int(out_trade_no.split('_')[0])
+        else:
+            order_id = int(out_trade_no)
+    except ValueError:
+        print( 'order_id非整数')
+        return
+    if result.get('code', '') == '40004':
+        if result.get('sub_code', '') == 'ACQ.TRADE_NOT_EXIST':
+            # 用户未扫码，支付宝订单未创建
+            return JsonResponse({'res': 1, 'status': 1})
+        else:
+            # 调用失败
+            return JsonResponse({'res': 0})
+    elif result.get('code', '') == '10000':
+        try:
+            order = Order.objects.get(order_id=order_id)
+        except Order.DoesNotExist:
+            # 订单不存在
+            print('order_id 订单不存在')
+            return
+        except Order.MultipleObjectsReturned:
+            raise Exception('订单表错误')
+
+        # 待支付状态的订单才会被查询，若未支付无需更新
+        if result.get("trade_status", "") == "WAIT_BUYER_PAY":
+            # 用户扫码，未支付
+            return JsonResponse({'res': 1, 'status': 1})
+        elif result.get("trade_status", "") == "TRADE_SUCCESS":
+            # 用户已支付
+            order.status = 2
+            order.time_pay = datetime.datetime.now()
+            order.save()
+            return JsonResponse({'res': 1, 'status': 2})
+        elif result.get("trade_status", "") == "TRADE_CLOSED":
+            # 用户超时未支付
+            order.status = 0
+            order.time_finish = datetime.datetime.now()
+            order.save()
+            return JsonResponse({'res': 1, 'status': 0})
