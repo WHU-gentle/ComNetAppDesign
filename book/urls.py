@@ -13,6 +13,8 @@ urlpatterns = [
     path('search/', views.search, name='search'),
     # 加入购物车指定本书（缺省为1）
     path('buy/', views.buy, name='buy'),
+    # 立即购买创建订单不添加购物车表项
+    path('buynow/', views.buynow, name='buynow'),
     # 删除用户购物车中商品的信息
     path('cancel/', views.cancel, name='cancel'),
     # 购物车书数目设置为
