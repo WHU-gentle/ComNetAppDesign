@@ -20,6 +20,11 @@ import urllib
 
 def all(request):
     user_id = request.session['user']['user_id']
+
+    # 更新待支付订单状态
+    for order in Order.objects.filter(user_id=user_id, status=1):
+        order_status_update(order)
+
     dict = {0: "已取消", 1: "待付款", 2: "待发货", 3: "已发货", 4: "已完成"}
     all_list = []
     for s in range(0, 5):
@@ -44,7 +49,7 @@ def all(request):
     return render(request, 'order/all.html', content)
 
 
-def detail(request, order_id):
+def detail(request, order_id: int):
     content = {}
     # 订单本身的信息
     try:
@@ -53,6 +58,9 @@ def detail(request, order_id):
         return Http404
     except Cart.MultipleObjectsReturned:
         raise Exception('同一订单号出现多次')
+
+    # 更新待支付订单状态
+    order_status_update(order)
 
     # object 转 dict
     content['order'] = model_to_dict(order)
@@ -208,50 +216,67 @@ def alipay_pay(request):
     return HttpResponse(buf.getvalue(), 'image/png')
 
 
-def alipay_query(request):
+# 未处理未扫码但长时间未支付的情况
+def alipay_query(out_trade_no: str):
     global alipayClient
 
-    out_trade_no = request.GET.get('order_id')
     result = alipayClient.api_alipay_trade_query(out_trade_no=out_trade_no)
-    print('订单查询返回值：', result)
+
     try:
         if settings.DEBUG:
             order_id = int(out_trade_no.split('_')[0])
         else:
             order_id = int(out_trade_no)
     except ValueError:
-        print( 'order_id非整数')
-        return
+        raise Exception('order_id非整数 %s' % out_trade_no)
+
     if result.get('code', '') == '40004':
         if result.get('sub_code', '') == 'ACQ.TRADE_NOT_EXIST':
             # 用户未扫码，支付宝订单未创建
-            return JsonResponse({'res': 1, 'status': 1})
+            return {'res': 1, 'status': 1}
         else:
             # 调用失败
-            return JsonResponse({'res': 0})
+            return {'res': 0}
     elif result.get('code', '') == '10000':
         try:
             order = Order.objects.get(order_id=order_id)
         except Order.DoesNotExist:
             # 订单不存在
-            print('order_id 订单不存在')
-            return
+            raise Exception('order_id 订单不存在 %d' % order_id)
         except Order.MultipleObjectsReturned:
-            raise Exception('订单表错误')
+            raise Exception('订单表错误 %d' % order_id)
 
         # 待支付状态的订单才会被查询，若未支付无需更新
         if result.get("trade_status", "") == "WAIT_BUYER_PAY":
             # 用户扫码，未支付
-            return JsonResponse({'res': 1, 'status': 1})
+            return {'res': 1, 'status': 1}
         elif result.get("trade_status", "") == "TRADE_SUCCESS":
             # 用户已支付
             order.status = 2
             order.time_pay = datetime.datetime.now()
             order.save()
-            return JsonResponse({'res': 1, 'status': 2})
+            return {'res': 1, 'status': 2}
         elif result.get("trade_status", "") == "TRADE_CLOSED":
             # 用户超时未支付
             order.status = 0
             order.time_finish = datetime.datetime.now()
             order.save()
-            return JsonResponse({'res': 1, 'status': 0})
+            return {'res': 1, 'status': 0}
+
+
+# 订单状态更新
+def order_status_update(order: Order):
+    # 待付款订单可能已经付款
+    if order.status == 1:
+        # 网络不稳定时最多查询5次，总间隔2秒
+        tot = 5
+        while True:
+            result = alipay_query(str(order.order_id))
+            if result['res'] == 1:
+                order.status = result['status']
+                order.save()
+                return
+            tot -= 1
+            if tot == 0:
+                raise Exception('订单状态查询错误')
+            time.sleep((5 - tot) * 0.2)
