@@ -370,7 +370,7 @@ def super_book(request, pageid):
     for book in allList:
         kind = {"kind_id":book.kind_id, "kind_name":book.kind_name}
         if kind not in kinds:
-            kinds = kinds.append(kind)
+            kinds.append(kind)
 
     paginator = Paginator(allList, 10)
     if pageid in paginator.page_range:
@@ -414,4 +414,49 @@ def super_user(request, pageid):
     pass
 
 def statistic(request):
-    pass
+    allList = Book.objects.all()
+
+    kinds = []
+    for book in allList:
+        kind = {
+            'kind_id':book.kind_id,
+            'kind_name':book.kind_name,
+            'kind_sale':0.0,              #本类书籍销售额
+            'kind_num':0,               #本类书籍销售量
+            'kind_maxNumBook':None,            #本类最大销售量书籍
+            'kind_minNumBook':None             #本类最小销售量书籍
+        }
+        if kind not in kinds:
+            kinds.append(kind)
+
+    all_stat = {
+        'all_sale':0,
+        'all_num':0,
+        'all_maxSaleKind':None,
+        'all_minSaleKind':None
+    }
+
+    for book in allList:
+        book_kind = book.kind_id;
+        for i in range(len(kinds)):
+            if kinds[i]['kind_id'] == book_kind:
+                print("----")
+                print(type(kinds[i]['kind_sale']))
+                print(type(book.sales))
+                print(type(book.price))
+
+                kinds[i]['kind_sale'] = kinds[i]['kind_sale'] + book.sales * book.price
+                kinds[i]['kind_num'] += book.sales
+                if kinds[i]['kind_maxNumBook'] == None:
+                    kinds[i]['kind_maxNumBook'] = book
+                else:
+                    if book.sales > kinds[i]['kind_maxNumBook'].sales:
+                        kinds[i]['kind_maxNumBook'] = book
+                if kinds[i]['kind_minNumBook'] == None:
+                    kinds[i]['kind_minNumBook'] = book
+                else:
+                    if book.sales < kinds[i]['kind_minNumBook'].sales:
+                        kinds[i]['kind_minNumBook'] = book
+                break
+
+    return render(request, 'user/super/statistic.html', {"books": allList, "kinds": kinds, "all_stat": all_stat})

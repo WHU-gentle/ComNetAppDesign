@@ -5,6 +5,7 @@
     <title>书籍管理</title>
 </head>
 <body>
+    <a href="/user/super/">返回</a>
     <div>
         <div>
             <form action="/user/super/book/create/" method="post">
@@ -56,7 +57,7 @@
                         <a href="/user/super/book/{{ page }}/">{{ page }}</a>
                     </div>
                 {% endif %}
-            {% end for %}
+            {% endfor %}
         </div>
     </div>
 </body>
