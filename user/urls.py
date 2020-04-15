@@ -24,6 +24,8 @@ urlpatterns = [
     path('super/', views.super_host, name="super_host"),
     path('super/book/<int:pageid>/', views.super_book, name="super_book"),
     path('super/book/create/', views.super_bookCreate, name="super_bookCreate"),
+    path('super/book/delete/<int:bookid>/', views.super_bookDelete, name="super_bookDelete"),
+    path('super/book/update/<int:bookid>/', views.super_bookUpdate, name="super_bookUpdate"),
     path('super/user/<int:pageid>/', views.super_user, name="super_user"),
     path('super/statistic/', views.statistic, name="statistic"),
 ]

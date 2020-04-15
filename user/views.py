@@ -410,6 +410,35 @@ def super_bookCreate(request):
     )
     return JsonResponse({'msg':"success"})
 
+def super_bookDelete(request, bookid):
+    try:
+        book = Book.objects.get(book_id=bookid)
+    except Book.DoesNotExist:
+        return JsonResponse({"msg":"对象不存在", "bookid":bookid})
+    else:
+        book = Book.objects.get(book_id=bookid).delete()
+        return JsonResponse({"msg":"删除成功", "bookid":bookid})
+
+def super_bookUpdate(request, bookid):
+    try:
+        book = Book.objects.get(book_id=bookid)
+    except Book.DoesNotExist:
+        return JsonResponse({"msg":"对象不存在", "bookid":bookid})
+    else:
+        book.book_name = request.POST.get("name")
+        book.book_picture = request.POST.get("pictrue")
+        book.price = request.POST.get("price")
+        book.price_old = request.POST.get("price_old")
+        book.author = request.POST.get("author")
+        book.isbn = request.POST.get("isbn")
+        book.press = request.POST.get("press")
+        book.rest = request.POST.get("rest")
+        book.kind_name = request.POST.get("kind_name")
+        book.kind_id = Book.objects.filter(kind_name=book.kind_name)[0].kind_id
+        book.description = request.POST.get("description")
+        book.save()
+        return JsonResponse({"msg":"修改成功", "bookid":bookid})
+
 def super_user(request, pageid):
     pass
 
@@ -458,7 +487,7 @@ def statistic(request):
                     if book.sales < kinds[i]['kind_minNumBook'].sales:
                         kinds[i]['kind_minNumBook'] = book
                 break
-                
+
     for kind in kinds:
         all_stat['all_sale'] += kind['kind_sale']
         all_stat['all_num'] += kind['kind_num']
