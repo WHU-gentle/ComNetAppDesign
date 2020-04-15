@@ -458,5 +458,21 @@ def statistic(request):
                     if book.sales < kinds[i]['kind_minNumBook'].sales:
                         kinds[i]['kind_minNumBook'] = book
                 break
+                
+    for kind in kinds:
+        all_stat['all_sale'] += kind['kind_sale']
+        all_stat['all_num'] += kind['kind_num']
+
+        if all_stat['all_maxSaleKind'] == None:
+            all_stat['all_maxSaleKind'] = kind
+        else:
+            if kind['kind_sale'] > all_stat['all_maxSaleKind']['kind_sale']:
+                all_stat['all_maxSaleKind'] = kind
+
+        if all_stat['all_minSaleKind'] == None:
+            all_stat['all_minSaleKind'] = kind
+        else:
+            if kind['kind_sale'] < all_stat['all_minSaleKind']['kind_sale']:
+                all_stat['all_minSaleKind'] = kind
 
     return render(request, 'user/super/statistic.html', {"books": allList, "kinds": kinds, "all_stat": all_stat})

@@ -8,7 +8,19 @@
     <div>
         <p>各类书籍统计</p>
         <div>
-            {
+            {% for kind in kinds %}
+                <div>
+                    {{ kind.kind_name }}
+                    销售额：{{ kind.kind_sale }}
+                    销售量：{{ kind.kind_num }}
+                    销量最高书籍：<a href="/book/detail/{{ kind.kind_maxNumBook.book_id }}">{{kind.kind_maxNumBook.book_name}}</a>
+                    销量最低书籍：<a href="/book/detail/{{ kind.kind_minNumBook.book_id }}">{{kind.kind_minNumBook.book_name}}</a>
+                </div>
+            {% endfor %}
+        </div>
+        <p>总销售统计</p>
+        <div>
+
         </div>
     </div>
 </body>
