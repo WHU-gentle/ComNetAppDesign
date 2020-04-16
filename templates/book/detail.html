@@ -72,9 +72,11 @@ $(function () {
             'book_id': book_id,
             'number': book_count
         }
-        $.get('/book/buynow/', params, function(data){
-            if(data.res==0)
-                alert(data.errmsg)
+        $.get('/order/buynow/', params, function(data){
+            if (data.res == 1){
+                window.location.href='/order/detail/' + String(data.order_id)
+            }
+               
         })
     })
 })

@@ -11,6 +11,8 @@ urlpatterns = [
     path('detail/<int:order_id>/', views.detail, name='detail'),
     # 将购物车中的全部货物提交订单
     path('new/', views.new, name='new'),
+    # 立即购买 直接创建订单
+    path('buynow/', views.buynow, name='buynow'),
     # 订单确认收货
     path('receive/', views.receive, name='receive'),
     # 订单支付宝支付

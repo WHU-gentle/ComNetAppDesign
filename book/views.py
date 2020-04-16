@@ -4,8 +4,6 @@ from user.models import Cart
 from book.models import Book
 from django.http import HttpResponse, JsonResponse
 from .models import Book
-from order.models import Order, OrderContent
-from order.views import detail as o_detail
 from django.db.models import Q
 import datetime
 
@@ -125,35 +123,6 @@ def buy(request):
         Cart.objects.filter(user_id=request.session['user']['user_id'], book_id=book_id)\
             .update(number=now.number + number)
     return JsonResponse({'res': 1, 'msg':'您成功添加了'+str(number)+'本'+str(book.book_name)})
-
-# 立即购买
-def buynow(request):
-    try:
-        book_id = int(request.GET.get('book_id'))
-        number = int(request.GET.get('number', 1))
-    except ValueError:
-        # 商品数目不合法
-        return JsonResponse({'res': 0, 'errmsg': '商品数量必须为数字'})
-    book = Book.objects.get(book_id=book_id)
-
-    order = Order(
-        user_id=request.session['user']['user_id'],
-        sum_price=int(number)*int(book.price),
-        # 订单状态：已取消 0， 待付款 1， 待发货 2， 已发货 3， 已完成 4
-        status=1,
-        time_submit=datetime.datetime.now()
-    )
-    order.save()
-
-    OrderContent.objects.create(
-        order_id=order.order_id,
-        book_id=book_id,
-        number=number,
-        price=book.price
-    )
-
-    return o_detail(request, order.order_id)
-    
 
 # 删除用户购物车中商品的信息
 def cancel(request):

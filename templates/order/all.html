@@ -77,8 +77,7 @@
                     <div class="g-nav">
                         <div class="g-wrap">
                             <ul class="g-nav-list">
-                                <li class="selected"><span id="first">全部订单</span></li>
-                                <li ><span id="second">已取消</span></li>
+                                <li class="myLi"><span id="second">已取消</span></li>
                                 <li ><span id="third">待付款</span></li>
                                 <li ><span id="fourth">已发货</span></li>
                                 <li ><span id="fifth">已完成</span></li>
@@ -112,7 +111,9 @@
                  );
                 </script>
         </div>
-                {% for order in all_list %}
+        {# 这是一种状态订单的div  每种状态应该都需要一个 #}
+        <div class="myDiv">
+            {% for order in unpaid_list %}
                 <ul class="order_list_th w978 clearfix">
                     <li class="col01">{{ order.time_submit }}</li>
                     <li class="col02">订单号：{{ order.order_id }}</li>
@@ -124,12 +125,12 @@
                         <tr>
                             <td width="55%">
                                 {# 遍历出来的order_books是一个OrderBooks对象 #}
-                                {% for order_books in order.order_books_li %}
+                                {% for order_books in order.order_content %}
                                 <ul class="order_book_list clearfix">
-                                    <li class="col01"><img src="{% static order_books.books.image %}"></li>
-                                    <li class="col02">{{ order_books.books.name }}<em>{{ order_books.books.price }}元/{{ order_books.books.unit }}</em></li>
-                                    <li class="col03">{{ order_books.count }}</li>
-                                    <li class="col04">{{ order_books.amount }}元</li>
+                                    <li class="col01"><img src="{% static order_books.books.book_picture %}"></li>
+                                    <li class="col02">{{ order_books.books.book_name }}<em>{{ order_books.price }}元/{{ order_books.books.unit }}</em></li>
+                                    <li class="col03">{{ order_books.number }}</li>
+                                    <li class="col04">{{ order_books.price }}元</li>
                                 </ul>
                                 {% endfor %}
                             </td>
@@ -140,6 +141,8 @@
                     </tbody>
                 </table>
                 {% endfor %}
+        </div>
+                
 
                 <div class="pagenation">
                     {% if order_li.has_previous %}
