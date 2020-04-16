@@ -25,7 +25,7 @@ def all(request):
     for order in Order.objects.filter(user_id=user_id, status=1):
         order_status_update(order)
 
-    dict = {0: "已取消", 1: "待付款", 2: "待发货", 3: "已发货", 4: "已完成"}
+    dict = {0: "已取消", 1: "待付款", 2: "待付款", 3: "已发货", 4: "已完成"}
     all_list = []
     for s in range(0, 5):
         for order in Order.objects.filter(user_id=user_id, status=s):
