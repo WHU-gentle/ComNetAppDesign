@@ -3,6 +3,7 @@ import io
 from django.forms import model_to_dict
 from django.http import JsonResponse, Http404, HttpResponseRedirect, HttpResponse
 from django.shortcuts import render, redirect
+from django.urls import reverse
 
 # Create your views here.
 from book.models import Book
@@ -25,26 +26,27 @@ def all(request):
     for order in Order.objects.filter(user_id=user_id, status=1):
         # ？频繁连续查询失败概率明显提高？同一顾客不太可能有过多待支付订单
         order_status_update(order)
-
-    dict = {0: "已取消", 1: "待付款", 2: "待付款", 3: "已发货", 4: "已完成"}
-    all_list = []
-    for s in range(0, 5):
-        for order in Order.objects.filter(user_id=user_id, status=s):
-            order = model_to_dict(order)
-            order['status'] = dict[order['status']]
-            all_list.append(order)
-    #cancel_list = [model_to_dict(order) for order in Order.objects.filter(user_id=user_id, status=0)]
-    #unpaid_list = [model_to_dict(order) for order in Order.objects.filter(user_id=user_id, status=1)]
-    #unsent_list = [model_to_dict(order) for order in Order.objects.filter(user_id=user_id, status=2)]
-    #unreceived_list = [model_to_dict(order) for order in Order.objects.filter(user_id=user_id, status=3)]
-    #finished_list = [model_to_dict(order) for order in Order.objects.filter(user_id=user_id, status=4)]
+    def Add_Content(order):
+        order = model_to_dict(order)
+        order_content_list = OrderContent.objects.filter(order_id=order['order_id'])
+        order_content = []
+        for o_c in order_content_list:
+            o_c = model_to_dict(o_c)
+            o_c['books'] = Book.objects.get(book_id=o_c['book_id'])
+            order_content.append(o_c)
+        order['order_content'] = order_content
+        return order
+    cancel_list = [Add_Content(order) for order in Order.objects.filter(user_id=user_id, status=0)]
+    unpaid_list = [Add_Content(order) for order in Order.objects.filter(user_id=user_id, status=1)]
+    unsent_list = [Add_Content(order) for order in Order.objects.filter(user_id=user_id, status=2)]
+    unreceived_list = [Add_Content(order) for order in Order.objects.filter(user_id=user_id, status=3)]
+    finished_list = [Add_Content(order) for order in Order.objects.filter(user_id=user_id, status=4)]
     content = {
-        #'cancel_list': cancel_list,
-        #'unpaid_list': unpaid_list,
-        #'unsent_list': unsent_list,
-        #'unreceived_list': unreceived_list,
-        #'finished_list': finished_list,
-        'all_list': all_list
+        'cancel_list': cancel_list,
+        'unpaid_list': unpaid_list,
+        'unsent_list': unsent_list,
+        'unreceived_list': unreceived_list,
+        'finished_list': finished_list,
     }
     # 因为没有对应前端，先返回成json
     return render(request, 'order/all.html', content)
@@ -71,6 +73,7 @@ def detail(request, order_id: int):
     # 订单中书籍的信息
     content['order_content'] = []
     order_content = OrderContent.objects.filter(order_id=order_id)
+    content['count'] = len(order_content)
     for book in order_content:
         element = {
             'id': book.order_id,
@@ -93,6 +96,10 @@ def detail(request, order_id: int):
             'kind_name': book.kind_name,
         })
         content['order_content'].append(element)
+        #收货地址
+        content['address'] = request.session['user']['address']
+        content['user_name'] = request.session['user']['user_name']
+        content['phone_number'] = request.session['user']['phone_number']
     return render(request, 'order/detail.html', content)
 
 
@@ -129,10 +136,36 @@ def new(request):
         user_id=request.session['user']['user_id'],
         select=True,
     ).delete()
-    # order.save()
-    # return JsonResponse({'res': 1, 'order_id':order.order_id})
-    return detail(request, order.order_id)
+    # 重定向展示实际的网址
+    print(order.order_id)
+    return redirect("/order/detail/%d" % order.order_id, permanent=True)
 
+# 立即购买
+def buynow(request):
+    try:
+        book_id = int(request.GET.get('book_id'))
+        number = int(request.GET.get('number', 1))
+    except ValueError:
+        # 商品数目不合法
+        return JsonResponse({'res': 0, 'errmsg': '商品数量必须为数字'})
+    book = Book.objects.get(book_id=book_id)
+
+    order = Order(
+        user_id=request.session['user']['user_id'],
+        sum_price=int(number)*int(book.price),
+        # 订单状态：已取消 0， 待付款 1， 待发货 2， 已发货 3， 已完成 4
+        status=1,
+        time_submit=datetime.datetime.now()
+    )
+    order.save()
+
+    OrderContent.objects.create(
+        order_id=order.order_id,
+        book_id=book_id,
+        number=number,
+        price=book.price
+    )
+    return JsonResponse({'res':1, 'order_id':order.order_id})
 
 def receive(request):
     try:

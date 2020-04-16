@@ -2,6 +2,11 @@
 {% load static %}
 {% block title %}订单详情{% endblock title %}
 {% block topfiles %}
+<script>
+    $(function(){
+        $()
+    })
+</script>
 {% endblock topfiles %}
 {% block body %}
 
@@ -10,7 +15,7 @@
     <div class="common_list_con clearfix">
         <dl>
             <dt>寄送到：</dt>
-            <dd><input type="radio" name="" checked="">北京市 海淀区 东北旺西路8号中关村软件园 （李思 收） 182****7528</dd>
+            <dd><input type="radio" name="" checked="">{{address}} （{{user_name}} 收） {{phone_number}}</dd>
         </dl>
     </div>
 
@@ -20,11 +25,7 @@
             <input type="radio" name="pay_style" checked>
             <label class="cash">货到付款</label>
             <input type="radio" name="pay_style">
-            <label class="weixin">微信支付</label>
-            <input type="radio" name="pay_style">
             <label class="zhifubao">支付宝</label>
-            <input type="radio" name="pay_style">
-            <label class="bank">银行卡支付</label>
         </div>
     </div>
 
@@ -55,14 +56,14 @@
 
     <div class="common_list_con clearfix">
         <div class="settle_con">
-            <div class="total_book_count">共<em>2</em>件商品，总金额<b>{{ order.sum_price }}元</b></div>
+            <div class="total_book_count">共<em>{{count}}</em>件商品，总金额<b>{{ order.sum_price }}元</b></div>
             <div class="transit">运费：<b>10元</b></div>
             <div class="total_pay">实付款：<b>{{ order.all_price }}</b></div>
         </div>
     </div>
 
     <div class="order_submit clearfix">
-        <a href="{% url 'order:to_pay' %}/?all_price={{ order.all_price }}&order_id={{ order.order_id }}" id="order_btn">提交订单</a>
+        <a href="" id="order_btn">提交订单</a>
     </div>
 {% endblock body %}
 {% block bottom %}
