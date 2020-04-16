@@ -4,6 +4,61 @@
 {% block topfiles %}
 {% endblock topfiles %}
 {% block body %}
+        <style type="text/css">
+        *{
+            margin: 0;
+            padding: 0;
+        }
+        ul >li{
+            list-style-type: none;
+        }
+        .g-header{
+            background-color:#fff;
+            position:relative;
+            z-index:3;
+            _zoom:1;
+        }
+
+        .g-nav {
+            height: 39px;
+            border-bottom: 1px solid #d5d5d5;
+            box-shadow: 0 1px 3px 0px rgba(160,160,160,0.2);
+        }
+
+        .g-nav-list {
+            width: 100%;
+            display: box;
+            display: -webkit-box;
+            display: -moz-box;
+        }
+
+        .g-nav-list li {
+            position: relative;
+            text-align: center;
+            box-flex: 1;
+            -webkit-box-flex: 1;
+            -moz-box-flex: 1;
+        }
+
+        .g-nav-list  span {
+            display: inline-block;
+            margin: 0 auto;
+            width: 100%;
+            line-height: 37px;
+            text-align: center;
+            color: #666666;
+        }
+
+        .g-nav-list .selected{
+            border-bottom: 2px solid #4277ad
+        }
+
+        .g-nav-list .selected span {
+            width: 100%;
+            color: #4277ad;
+            line-height: 38px;
+        }
+    </style>
 
     <div class="main_con clearfix">
         <div class="left_menu_con clearfix">
@@ -13,10 +68,50 @@
                 <li><a href="{% url 'order:all' %}" class="active">· 全部订单</a></li>
             </ul>
         </div>
+
         <div class="right_content clearfix">
                 {% csrf_token %}
                 <h3 class="common_title2">全部订单</h3>
                 {# OrderInfo #}
+                <div class="g-header">
+                    <div class="g-nav">
+                        <div class="g-wrap">
+                            <ul class="g-nav-list">
+                                <li class="selected"><span id="first">全部订单</span></li>
+                                <li ><span id="second">已取消</span></li>
+                                <li ><span id="third">待付款</span></li>
+                                <li ><span id="fourth">已发货</span></li>
+                                <li ><span id="fifth">已完成</span></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <script>
+                 $().toolBar(
+                    function action_first(){
+                    //分栏一事件
+                    //alert("分栏一事件");
+                    },
+                    function action_second(){
+                    //分栏二事件
+                    //alert("分栏二事件");
+                    },
+                    function action_third(){
+                        //分栏二事件
+                        //alert("分栏三事件");
+                    },
+                    function action_fourth(){
+                        //分栏二事件
+                        //alert("分栏三事件");
+                    },
+                    function action_five(){
+                        //分栏二事件
+                        //alert("分栏三事件");
+                    }
+                 );
+                </script>
+        </div>
                 {% for order in all_list %}
                 <ul class="order_list_th w978 clearfix">
                     <li class="col01">{{ order.time_submit }}</li>
@@ -61,6 +156,6 @@
                         <a href="{% url 'user:order' page=order_li.next_page_number %}">下一页</a>
                     {% endif %}
                 </div>
-        </div>
+
     </div>
 {% endblock body %}
