@@ -23,6 +23,7 @@ def all(request):
 
     # 更新待支付订单状态
     for order in Order.objects.filter(user_id=user_id, status=1):
+        # ？频繁连续查询失败概率明显提高？同一顾客不太可能有过多待支付订单
         order_status_update(order)
 
     dict = {0: "已取消", 1: "待付款", 2: "待付款", 3: "已发货", 4: "已完成"}
@@ -219,8 +220,10 @@ def alipay_pay(request):
 # 未处理未扫码但长时间未支付的情况
 def alipay_query(out_trade_no: str):
     global alipayClient
-
-    result = alipayClient.api_alipay_trade_query(out_trade_no=out_trade_no)
+    try:
+        result = alipayClient.api_alipay_trade_query(out_trade_no=out_trade_no)
+    except:
+        return {'res': 0}
 
     try:
         if settings.DEBUG:
@@ -268,6 +271,11 @@ def alipay_query(out_trade_no: str):
 def order_status_update(order: Order):
     # 待付款订单可能已经付款
     if order.status == 1:
+        # 订单提交30分钟未支付即自动取消
+        if datetime.datetime.now() - order.time_submit > datetime.timedelta(minutes=30):
+            order.status = 0
+            order.save()
+            return
         # 网络不稳定时最多查询5次，总间隔2秒
         tot = 5
         while True:
@@ -279,4 +287,5 @@ def order_status_update(order: Order):
             tot -= 1
             if tot == 0:
                 raise Exception('订单状态查询错误')
+            print('retry %d' % (5-tot))
             time.sleep((5 - tot) * 0.2)
