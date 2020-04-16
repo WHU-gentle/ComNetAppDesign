@@ -248,13 +248,18 @@ def cart(request):
         u_name = request.session['user']['user_name']
         u_id = User.objects.get(user_name=u_name).user_id
         cart_list = Cart.objects.filter(user_id=u_id)
+
+        # 购物车选中的商品件数：前端计算
+        # 购物车所有商品种类数
+        total_kinds_count = 0
         cart_data = []
         for cart in cart_list:
+            total_kinds_count += 1
             cart = model_to_dict(cart)
             book = Book.objects.get(book_id=cart['book_id'])
             cart['book'] = book
             cart_data.append(cart)
-        return render(request, 'user/cart.html', {'cart_list': cart_data, 'size': len(cart_data)})
+        return render(request, 'user/cart.html', {'cart_list': cart_data, 'total_kinds_count': total_kinds_count})
     else:
         return render(request, 'user/login.html')
 

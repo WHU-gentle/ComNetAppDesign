@@ -339,10 +339,10 @@ html,body{height:100%}
 
 .sub_page_name{font-size:18px;color:#666;margin:50px 0 0 20px}
 
-.total_count{
+.total_kinds_count{
 	width:1200px;margin:0 auto;height:40px;line-height:40px;font-size:14px;
 }
-.total_count em{
+.total_kinds_count em{
 	font-size:16px;color:#ff4200;margin:0 5px;
 }
 
