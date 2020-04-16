@@ -136,9 +136,9 @@ def new(request):
         user_id=request.session['user']['user_id'],
         select=True,
     ).delete()
-    # order.save()
-    # return JsonResponse({'res': 1, 'order_id':order.order_id})
-    return detail(request, order.order_id)
+    # 重定向展示实际的网址
+    print(order.order_id)
+    return redirect("/order/detail/%d" % order.order_id, permanent=True)
 
 # 立即购买
 def buynow(request):
