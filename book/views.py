@@ -243,3 +243,12 @@ def count(request):
         return JsonResponse({'res': len(cart_list)})
     else:
         return JsonResponse({'res': -1})
+
+
+def select_count(request):
+    if not request.session['islogin']:
+        return JsonResponse({'res': 0})
+    count = 0
+    for cart in Cart.objects.filter(user_id=request.session['user']['user_id'], select=True):
+        count += cart.number
+    return JsonResponse({'res': count})

@@ -20,6 +20,7 @@
 
     // 计算所有被选中商品的总价，总数目和商品的小计
     function update_total_price_checked() {
+        update_select_count() // 改变上栏已选中书籍数量
         total_count = 0
         total_price = 0
         total_checked = true

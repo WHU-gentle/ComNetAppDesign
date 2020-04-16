@@ -89,6 +89,19 @@ line-height:100px;
 
 </style>
 
+    {% block cart_count %}
+        <script>
+        $(function () {
+            window.update_select_count = function() {
+                $.get('/book/select_count/', function (data) {
+                    // {'res':商品的总数}
+                    $('#show_count').html(data.res)
+                })
+            }
+            update_select_count()
+        })
+        </script>
+    {% endblock cart_count %}
     {% block topfiles %}
     {# 网页顶部引入文件 #}
     {% endblock topfiles %}
@@ -157,13 +170,5 @@ line-height:100px;
     {% block bottom %}{% endblock bottom %}
     {# 网页底部引入文件块 #}
     {% block bottomfiles %}{% endblock bottomfiles %}
-    {% block cart_count %}
-<!--        <script>-->
-<!--            $.get('/cart/count/', function (data) {-->
-<!--                // {'res':商品的总数}-->
-<!--                $('#show_count').html(data.res)-->
-<!--            })-->
-<!--        </script>-->
-    {% endblock cart_count %}
 </body>
 </html>

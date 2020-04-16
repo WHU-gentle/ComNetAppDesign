@@ -57,6 +57,7 @@ $(function () {
                     // 添加成功
                     var bookName = "{{ book.name }}"
                     var msg = "您已成功添加" + String(book_count) + "本" + "《" + bookName + "》"
+                    update_select_count() // 改变上栏已选中书籍数量
                     alert(msg)
                 } else if(data.res==0){
                     // 添加失败
