@@ -4,60 +4,9 @@
 {% block topfiles %}
 {% endblock topfiles %}
 {% block body %}
-        <style type="text/css">
-        *{
-            margin: 0;
-            padding: 0;
-        }
-        ul >li{
-            list-style-type: none;
-        }
-        .g-header{
-            background-color:#fff;
-            position:relative;
-            z-index:3;
-            _zoom:1;
-        }
-
-        .g-nav {
-            height: 39px;
-            border-bottom: 1px solid #d5d5d5;
-            box-shadow: 0 1px 3px 0px rgba(160,160,160,0.2);
-        }
-
-        .g-nav-list {
-            width: 100%;
-            display: box;
-            display: -webkit-box;
-            display: -moz-box;
-        }
-
-        .g-nav-list li {
-            position: relative;
-            text-align: center;
-            box-flex: 1;
-            -webkit-box-flex: 1;
-            -moz-box-flex: 1;
-        }
-
-        .g-nav-list  span {
-            display: inline-block;
-            margin: 0 auto;
-            width: 100%;
-            line-height: 37px;
-            text-align: center;
-            color: #666666;
-        }
-
-        .g-nav-list .selected{
-            border-bottom: 2px solid #4277ad
-        }
-
-        .g-nav-list .selected span {
-            width: 100%;
-            color: #4277ad;
-            line-height: 38px;
-        }
+    <style>
+    div.show{display:block;}
+    div.hide{display:none;}
     </style>
 
     <div class="main_con clearfix">
@@ -72,90 +21,27 @@
         <div class="right_content clearfix">
                 {% csrf_token %}
                 <h3 class="common_title2">全部订单</h3>
+
+                <div class="r_wrap fr clearfix">
+                    <ul class="detail_tab clearfix">
+                        <li class="active" id="0">全部订单</li>
+                        <li id="1">已取消</li>
+                        <li id="2">待付款</li>
+                        <li id="3">待发货</li>
+                        <li id="4">已发货</li>
+                        <li id="5">已完成</li>
+                    </ul>
+                </div>
+
+                <div id='6' class="show">被替换的元素0</div>
+                <div id='7' class="hide">被替换的元素1</div>
+                <div id='8' class="hide">被替换的元素2</div>
+                <div id='9' class="hide">被替换的元素3</div>
+                <div id='10' class="hide">被替换的元素4</div>
+                <div id='11' class="hide">被替换的元素5</div>
+
+
                 {# OrderInfo #}
-                <div class="g-header">
-                    <div class="g-nav">
-                        <div class="g-wrap">
-                            <ul class="g-nav-list">
-                                <li class="selected"><span id="first">全部订单</span></li>
-                                <li ><span id="second">已取消</span></li>
-                                <li ><span id="third">待付款</span></li>
-                                <li ><span id="fourth">已发货</span></li>
-                                <li ><span id="fifth">已完成</span></li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-
-                <script>
-                 $().toolBar(
-                    function action_first(){
-                    //分栏一事件
-                    //alert("分栏一事件");
-                    },
-                    function action_second(){
-                    //分栏二事件
-                    //alert("分栏二事件");
-                    },
-                    function action_third(){
-                        //分栏二事件
-                        //alert("分栏三事件");
-                    },
-                    function action_fourth(){
-                        //分栏二事件
-                        //alert("分栏三事件");
-                    },
-                    function action_five(){
-                        //分栏二事件
-                        //alert("分栏三事件");
-                    }
-                 );
-                </script>
         </div>
-                {% for order in all_list %}
-                <ul class="order_list_th w978 clearfix">
-                    <li class="col01">{{ order.time_submit }}</li>
-                    <li class="col02">订单号：{{ order.order_id }}</li>
-                    <li class="col02 stress">{{ order.status }}</li>
-                </ul>
-
-                <table class="order_list_table w980">
-                    <tbody>
-                        <tr>
-                            <td width="55%">
-                                {# 遍历出来的order_books是一个OrderBooks对象 #}
-                                {% for order_books in order.order_books_li %}
-                                <ul class="order_book_list clearfix">
-                                    <li class="col01"><img src="{% static order_books.books.image %}"></li>
-                                    <li class="col02">{{ order_books.books.name }}<em>{{ order_books.books.price }}元/{{ order_books.books.unit }}</em></li>
-                                    <li class="col03">{{ order_books.count }}</li>
-                                    <li class="col04">{{ order_books.amount }}元</li>
-                                </ul>
-                                {% endfor %}
-                            </td>
-                            <td width="15%">{{ order.sum_price }}元</td>
-                            <td width="15%">{{ order.status }}</td>
-                            <td width="15%"><a href="#" pay_method="{{ order.pay_method }}" order_id="{{ order.order_id }}" order_status="{{ order.status }}" class="oper_btn">去付款</a></td>
-                        </tr>
-                    </tbody>
-                </table>
-                {% endfor %}
-
-                <div class="pagenation">
-                    {% if order_li.has_previous %}
-                        <a href="{% url 'user:order' page=order_li.previous_page_number %}">上一页</a>
-                    {% endif %}
-                    {% for page in pages %}
-                        {% if page == order_li.number %}
-                            <a href="{% url 'user:order' page=page %}" class="active">{{ page }}</a>
-                        {% else %}
-                            <a href="{% url 'user:order' page=page %}">{{ page }}</a>
-                        {% endif %}
-                    {% endfor %}
-                    {% if order_li.has_next %}
-                        <a href="{% url 'user:order' page=order_li.next_page_number %}">下一页</a>
-                    {% endif %}
-                </div>
-
     </div>
 {% endblock body %}

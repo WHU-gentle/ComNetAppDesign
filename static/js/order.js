@@ -1,42 +1,26 @@
-$.fn.toolBar =  function changeBar(firstAction,secondAction,thirdAction,fourthAction,fifthAction){
-    $("#first").click(function(){
-        changeBtnState(0);
-        if(firstAction){
-            firstAction();
-        }
-    });
-    $("#second").click(function(){
-        changeBtnState(1);
-        if(secondAction){
-            secondAction();
-        }
-    });
-    $("#third").click(function(){
-        changeBtnState(2);
-        if(thirdAction){
-            thirdAction();
-        }
-    });
-    $("#fourth").click(function(){
-        changeBtnState(3);
-        if(fourthAction){
-            fourthAction();
-        }
-    });
-    $("#fifth").click(function(){
-        changeBtnState(4);
-        if(fifthAction){
-            fifthAction();
-        }
-    });
-}
-
-function changeBtnState(ind){
-    $(".g-nav-list li").each(function(index){
-        if(index==ind){
-            $(this).attr("class","selected");
-        }else{
-            $(this).attr("class","none");
-        }
-    });
-}
+ var timeId;
+ $(document).ready(function(){
+ $("li").each(function(index){
+ //index是li数组的的索引值
+ $(this).mouseover(function(){
+ var liNode = $(this);
+ var id = $(this).attr('id');
+ //延迟是为了减少服务器压力，防止鼠标快速滑动
+ timeId = setTimeout(function(){
+  //将原来显示的div隐藏掉
+  $("div.show").removeClass("show").addClass("hide");
+  //将原来的li的active去掉
+  $("li.active").removeClass("active");
+  //???有问题
+  if(String(Number(id)+6)==$("div").attr('id')){
+   var x=document.getElementsById(String(Number(id)+6));
+   x.removeClass("hide").addClass("show");
+  }
+  //$("div").eq(index).show();
+  liNode.addClass("active");
+ },300);
+ }).mouseout(function(){
+ clearTimeout(timeId);
+ });
+ });
+ });
