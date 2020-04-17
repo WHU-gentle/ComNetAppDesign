@@ -152,3 +152,19 @@ ALIPAY_PUBLIC_KEY = '''-----BEGIN PUBLIC KEY-----
 MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAwy7Xzzm9XnT3Clb2wGmO5O/N1/jpiEgIVomCYiFJJCvADlMdPuVcFaRPYMDj2cE6f2w+MiJQucTazpAbOxC0PQMwcjfFjENVvk0ZfuJwWLQI0bOdbiCN79iaPstjqHgrSFKbU3njuoFkbKImKCu4YbgiQoq+vXan+M80QLhVafMmIqa0jDOBLpqF3iw1xsl0FHxfkRFodHs1obF0cj6Z2qbpzele+LGlkTI9J2l0NIXPDaA0S/w1nsLqN5yfMzExpDxcY+PlQCwSgHPzVqwkQ4dspbEKy+RxJTIbuTJpPNbiVvZwsc3WmxrWzvFH9jk2mr7LccjNbxPVOwOIoJLMCwIDAQAB
 -----END PUBLIC KEY-----
 '''
+
+# 订单状态：已取消 0， 待付款 1， 待发货 2， 已发货 3， 已完成 4
+STATUS_NUM_TO_STR = {
+    0: '已取消',
+    1: '待付款',
+    2: '待发货',
+    3: '已发货',
+    4: '已完成',
+}
+STATUS_STR_TO_NUM = {
+    '已取消': 0,
+    '待付款': 1,
+    '待发货': 2,
+    '已发货': 3,
+    '已完成': 4,
+}

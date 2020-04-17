@@ -69,6 +69,7 @@ def detail(request, order_id: int):
     content['order'] = model_to_dict(order)
     # 计算总付款数=总价+运费
     content['order']['all_price'] = content['order']['sum_price'] + 10
+    content['order']['status_str'] = settings.STATUS_NUM_TO_STR[order.status]
 
     # 订单中书籍的信息
     content['order_content'] = []
@@ -312,7 +313,11 @@ def order_status_update(order: Order):
         # 网络不稳定时最多查询5次，总间隔2秒
         tot = 5
         while True:
-            result = alipay_query(str(order.order_id))
+            if settings.DEBUG:
+                result = alipay_query(input('输入支付宝订单号\n'))
+            else:
+                result = alipay_query(str(order.order_id))
+            print('alipay_query %d' % result['res'])
             if result['res'] == 1:
                 order.status = result['status']
                 order.save()
