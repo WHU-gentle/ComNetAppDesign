@@ -198,24 +198,22 @@ alipayClient = AliPay(
 )
 
 
+def build_trade_no(order_id: int, datetime):
+    return (str(order_id) + '__%s' % datetime).split('.')[0].replace(' ', '_').replace('-', '_').replace(':', '_')
+
+
 def alipay_pay(request):
     global alipayClient
 
-    out_trade_no = request.GET.get('order_id')
-    if out_trade_no is None:
+    order_id = request.GET.get('order_id')
+    if order_id is None:
         print('无order_id')
         return
     try:
-        order_id = int(out_trade_no)
+        order_id = int(order_id)
     except ValueError:
         print('order_id非整数')
         return
-
-    if settings.DEBUG:
-        # 调试时因为支付宝服务器记录已被扫码的订单状态，每次模拟一个新订单进行调试
-        out_trade_no += ('__%s' % datetime.datetime.now()).split('.')[0].replace(' ', '_').replace('-', '_').replace(':', '_')
-        print(out_trade_no)
-
     try:
         order = Order.objects.get(order_id=order_id)
     except Order.DoesNotExist:
@@ -225,6 +223,9 @@ def alipay_pay(request):
     except Order.MultipleObjectsReturned:
         raise Exception('订单表错误')
 
+    # 支付宝订单号
+    out_trade_no = build_trade_no(order_id, order.time_submit)
+    print(out_trade_no)
     # 书籍总价加运费
     total_amount = order.sum_price + 10.00
     subject = '珞珈在线书店订单 %s' % order.time_submit
@@ -260,10 +261,7 @@ def alipay_query(out_trade_no: str):
         return {'res': 0}
 
     try:
-        if settings.DEBUG:
-            order_id = int(out_trade_no.split('_')[0])
-        else:
-            order_id = int(out_trade_no)
+        order_id = int(out_trade_no.split('_')[0])
     except ValueError:
         raise Exception('order_id非整数 %s' % out_trade_no)
 
@@ -313,10 +311,7 @@ def order_status_update(order: Order):
         # 网络不稳定时最多查询5次，总间隔2秒
         tot = 5
         while True:
-            if settings.DEBUG:
-                result = alipay_query(input('输入支付宝订单号\n'))
-            else:
-                result = alipay_query(str(order.order_id))
+            result = alipay_query(build_trade_no(order.order_id, order.time_submit))
             print('alipay_query %d' % result['res'])
             if result['res'] == 1:
                 order.status = result['status']
