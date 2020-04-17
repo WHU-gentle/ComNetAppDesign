@@ -33,43 +33,8 @@
                     </ul>
                 </div>
 
-                <div class="show">被替换的元素0</div>
-                <div class="hide">被替换的元素1</div>
-                <div class="hide">被替换的元素2</div>
-                <div class="hide">被替换的元素3</div>
-                <div class="hide">被替换的元素4</div>
-                <div class="hide">被替换的元素5</div>
-        </div>
-    </div>
-
-    <script>
-    var timeId;
- $(document).ready(function(){
- $("li").each(function(index){
- //index是li数组的的索引值
- $(this).mouseover(function(){
- var liNode = $(this);
- var id = $(this).attr('id');
- //延迟是为了减少服务器压力，防止鼠标快速滑动
- timeId = setTimeout(function(){
-  //将原来显示的div隐藏掉
-  $("div.show").removeClass("show").addClass("hide");
-  //将原来的li的active去掉
-  $("li.active").removeClass("active");
-  $("div.hide").eq(index-2).removeClass("hide").addClass("show");
-  liNode.addClass("active");
- },300);
- }).mouseout(function(){
- clearTimeout(timeId);
- });
- });
- });
-    </script>
-
-
-
-                {# OrderInfo #}
-            {% for order in all_list %}
+                <div class="show">
+                {% for order in all_list %}
                 <ul class="order_list_th w978 clearfix">
                     <li class="col01">{{ order.time_submit }}</li>
                     <li class="col02">订单号：{{ order.order_id }}</li>
@@ -97,7 +62,193 @@
                     </tbody>
                 </table>
                 {% endfor %}
+                </div>
 
+                <div class="hide">
+                {% for order in cancel_list %}
+                <ul class="order_list_th w978 clearfix">
+                    <li class="col01">{{ order.time_submit }}</li>
+                    <li class="col02">订单号：{{ order.order_id }}</li>
+                    <li class="col02 stress">{{ order.status }}</li>
+                </ul>
+
+                <table class="order_list_table w980">
+                    <tbody>
+                        <tr>
+                            <td width="55%">
+                                {# 遍历出来的order_books是一个OrderBooks对象 #}
+                                {% for order_books in order.order_content %}
+                                <ul class="order_book_list clearfix">
+                                    <li class="col01"><img src="{% static order_books.books.book_picture %}"></li>
+                                    <li class="col02">{{ order_books.books.book_name }}<em>{{ order_books.books.price }}元/{{ order_books.books.unit }}</em></li>
+                                    <li class="col03">{{ order_books.number }}</li>
+                                    <li class="col04">{{ order_books.price }}元</li>
+                                </ul>
+                                {% endfor %}
+                            </td>
+                            <td width="15%">{{ order.sum_price }}元</td>
+                            <td width="15%">{{ order.status }}</td>
+                            <td width="15%"><a href="#" pay_method="{{ order.pay_method }}" order_id="{{ order.order_id }}" order_status="{{ order.status }}" class="oper_btn">去付款</a></td>
+                        </tr>
+                    </tbody>
+                </table>
+                {% endfor %}
+                </div>
+
+
+                <div class="hide">
+                {% for order in unpaid_list %}
+                <ul class="order_list_th w978 clearfix">
+                    <li class="col01">{{ order.time_submit }}</li>
+                    <li class="col02">订单号：{{ order.order_id }}</li>
+                    <li class="col02 stress">{{ order.status }}</li>
+                </ul>
+
+                <table class="order_list_table w980">
+                    <tbody>
+                        <tr>
+                            <td width="55%">
+                                {# 遍历出来的order_books是一个OrderBooks对象 #}
+                                {% for order_books in order.order_content %}
+                                <ul class="order_book_list clearfix">
+                                    <li class="col01"><img src="{% static order_books.books.book_picture %}"></li>
+                                    <li class="col02">{{ order_books.books.book_name }}<em>{{ order_books.books.price }}元/{{ order_books.books.unit }}</em></li>
+                                    <li class="col03">{{ order_books.number }}</li>
+                                    <li class="col04">{{ order_books.price }}元</li>
+                                </ul>
+                                {% endfor %}
+                            </td>
+                            <td width="15%">{{ order.sum_price }}元</td>
+                            <td width="15%">{{ order.status }}</td>
+                            <td width="15%"><a href="#" pay_method="{{ order.pay_method }}" order_id="{{ order.order_id }}" order_status="{{ order.status }}" class="oper_btn">去付款</a></td>
+                        </tr>
+                    </tbody>
+                </table>
+                {% endfor %}
+                </div>
+
+
+                <div class="hide">
+                    {% for order in unsent_list %}
+                    <ul class="order_list_th w978 clearfix">
+                        <li class="col01">{{ order.time_submit }}</li>
+                        <li class="col02">订单号：{{ order.order_id }}</li>
+                        <li class="col02 stress">{{ order.status }}</li>
+                    </ul>
+    
+                    <table class="order_list_table w980">
+                        <tbody>
+                            <tr>
+                                <td width="55%">
+                                    {# 遍历出来的order_books是一个OrderBooks对象 #}
+                                    {% for order_books in order.order_content %}
+                                    <ul class="order_book_list clearfix">
+                                        <li class="col01"><img src="{% static order_books.books.book_picture %}"></li>
+                                        <li class="col02">{{ order_books.books.book_name }}<em>{{ order_books.books.price }}元/{{ order_books.books.unit }}</em></li>
+                                        <li class="col03">{{ order_books.number }}</li>
+                                        <li class="col04">{{ order_books.price }}元</li>
+                                    </ul>
+                                    {% endfor %}
+                                </td>
+                                <td width="15%">{{ order.sum_price }}元</td>
+                                <td width="15%">{{ order.status }}</td>
+                                <td width="15%"><a href="#" pay_method="{{ order.pay_method }}" order_id="{{ order.order_id }}" order_status="{{ order.status }}" class="oper_btn">去付款</a></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    {% endfor %}
+                </div>
+
+
+                <div class="hide">
+                    {% for order in unreceived_list %}
+                    <ul class="order_list_th w978 clearfix">
+                        <li class="col01">{{ order.time_submit }}</li>
+                        <li class="col02">订单号：{{ order.order_id }}</li>
+                        <li class="col02 stress">{{ order.status }}</li>
+                    </ul>
+    
+                    <table class="order_list_table w980">
+                        <tbody>
+                            <tr>
+                                <td width="55%">
+                                    {# 遍历出来的order_books是一个OrderBooks对象 #}
+                                    {% for order_books in order.order_content %}
+                                    <ul class="order_book_list clearfix">
+                                        <li class="col01"><img src="{% static order_books.books.book_picture %}"></li>
+                                        <li class="col02">{{ order_books.books.book_name }}<em>{{ order_books.books.price }}元/{{ order_books.books.unit }}</em></li>
+                                        <li class="col03">{{ order_books.number }}</li>
+                                        <li class="col04">{{ order_books.price }}元</li>
+                                    </ul>
+                                    {% endfor %}
+                                </td>
+                                <td width="15%">{{ order.sum_price }}元</td>
+                                <td width="15%">{{ order.status }}</td>
+                                <td width="15%"><a href="#" pay_method="{{ order.pay_method }}" order_id="{{ order.order_id }}" order_status="{{ order.status }}" class="oper_btn">去付款</a></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    {% endfor %}
+                </div>
+
+
+                <div class="hide">
+                    {% for order in finished_list %}
+                    <ul class="order_list_th w978 clearfix">
+                        <li class="col01">{{ order.time_submit }}</li>
+                        <li class="col02">订单号：{{ order.order_id }}</li>
+                        <li class="col02 stress">{{ order.status }}</li>
+                    </ul>
+    
+                    <table class="order_list_table w980">
+                        <tbody>
+                            <tr>
+                                <td width="55%">
+                                    {# 遍历出来的order_books是一个OrderBooks对象 #}
+                                    {% for order_books in order.order_content %}
+                                    <ul class="order_book_list clearfix">
+                                        <li class="col01"><img src="{% static order_books.books.book_picture %}"></li>
+                                        <li class="col02">{{ order_books.books.book_name }}<em>{{ order_books.books.price }}元/册</em></li>
+                                        <li class="col03">{{ order_books.number }}</li>
+                                        <li class="col04">{{ order_books.price }}元</li>
+                                    </ul>
+                                    {% endfor %}
+                                </td>
+                                <td width="15%">{{ order.sum_price }}元</td>
+                                <td width="15%">{{ order.status }}</td>
+                                <td width="15%"><a href="#" pay_method="{{ order.pay_method }}" order_id="{{ order.order_id }}" order_status="{{ order.status }}" class="oper_btn">去付款</a></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    {% endfor %}
+                </div>
+        </div>
+    </div>
+
+    <script>
+    var timeId;
+ $(document).ready(function(){
+ $("li").each(function(index){
+ //index是li数组的的索引值
+ $(this).mouseover(function(){
+ var liNode = $(this);
+ var id = $(this).attr('id');
+ //延迟是为了减少服务器压力，防止鼠标快速滑动
+ timeId = setTimeout(function(){
+  //将原来显示的div隐藏掉
+  $("div.show").removeClass("show").addClass("hide");
+  //将原来的li的active去掉
+  $("li.active").removeClass("active");
+  $("div.hide").eq(index-2).removeClass("hide").addClass("show");
+  liNode.addClass("active");
+ },300);
+ }).mouseout(function(){
+ clearTimeout(timeId);
+ });
+ });
+ });
+    </script>
+                <!--
                 <div class="pagenation">
                     {% if order_li.has_previous %}
                         <a href="{% url 'user:order' page=order_li.previous_page_number %}">上一页</a>
@@ -113,4 +264,5 @@
                         <a href="{% url 'user:order' page=order_li.next_page_number %}">下一页</a>
                     {% endif %}
                 </div>
+                -->
 {% endblock body %}
