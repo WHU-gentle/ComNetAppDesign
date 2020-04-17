@@ -12,11 +12,11 @@
   //将原来的li的active去掉
   $("li.active").removeClass("active");
   //???有问题
-  if(String(Number(id)+6)==$("div").attr('id')){
-   var x=document.getElementsById(String(Number(id)+6));
-   x.removeClass("hide").addClass("show");
-  }
-  //$("div").eq(index).show();
+  //if(String(Number(id)+6)===$("div").attr('id')){
+  // var x=document.getElementsById(String(Number(id)+6));
+   //x.removeClass("hide").addClass("show");
+  //}
+  $("div.hide").eq(index).removeClass("hide").addClass("show");
   liNode.addClass("active");
  },300);
  }).mouseout(function(){
