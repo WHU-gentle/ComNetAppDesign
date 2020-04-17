@@ -27,12 +27,15 @@ def all(request):
         # ？频繁连续查询失败概率明显提高？同一顾客不太可能有过多待支付订单
         order_status_update(order)
     def Add_Content(order):
+        dic = {0: '已取消', 1: '待付款', 2: '待发货', 3: '已发货', 4: '已完成'}
         order = model_to_dict(order)
+        order['status'] = dic[order['status']]
         order_content_list = OrderContent.objects.filter(order_id=order['order_id'])
         order_content = []
         for o_c in order_content_list:
             o_c = model_to_dict(o_c)
             o_c['books'] = Book.objects.get(book_id=o_c['book_id'])
+            o_c['price'] = o_c['price'] * o_c['number']
             order_content.append(o_c)
         order['order_content'] = order_content
         return order
@@ -139,7 +142,7 @@ def new(request):
     ).delete()
     # 重定向展示实际的网址
     print(order.order_id)
-    return redirect("/order/detail/%d" % order.order_id, permanent=True)
+    return redirect("/order/detail/%d" % order.order_id)
 
 # 立即购买
 def buynow(request):
