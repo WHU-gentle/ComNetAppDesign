@@ -114,7 +114,8 @@ def register(request):
     return render(request, 'user/register.html')
 
 
-def register_check(user_name, password, repeat_password, phone_number, address, email, verify_code, verifyemail):
+def register_check(user_name, password, repeat_password, phone_number, address,
+                   email, verify_email_address, code, verify_email_code):
     error_message = []
     '''
     用户信息限制：    （中文字符占用空间？）
@@ -161,8 +162,12 @@ def register_check(user_name, password, repeat_password, phone_number, address, 
     elif len(email) > 50:
         error_status |= 32
         error_message.append('电子邮箱长度超过50个字符')
+    # 绑定邮箱
+    if email != verify_email_address:
+        error_status |= 32
+        error_message.append('电子邮箱与邮件接收邮箱不一致')
     # 邮件验证码
-    if verify_code == '' or verify_code != verifyemail:
+    if code == '' or code != verify_email_code:
         error_status |= 64
         error_message.append('邮件验证码错误')
 
@@ -181,12 +186,12 @@ def result(request):
     phone_number = request.POST.get('phone_number')
     address = request.POST.get('address')
     email = request.POST.get('email')
-    verify_code = request.POST.get('verify_code')
+    verify_email_code = request.POST.get('verify_email_code')
 
     res = register_check(user_name, password, repeat_password, phone_number, address,
-                         email, verify_code, request.session.get('verifyemail'))
-    # 无论验证结果，不能再次验证
-    request.session['verifycode'] = ''
+                         email, request.session.get('verify_email_address'),
+                         verify_email_code, request.session.get('verify_email_code'))
+
     if res['res'] == 1:
         user = User(user_name=user_name, password=password,
                     phone_number=phone_number, address=address,
@@ -208,12 +213,11 @@ def register_update(request):
     phone_number = request.POST.get('phone_number')
     address = request.POST.get('address')
     email = request.POST.get('email')
-    verify_code = request.POST.get('verify_code')
+    verify_email_code = request.POST.get('verify_email_code')
 
     res = register_check(user_name, password, repeat_password, phone_number, address,
-                         email, verify_code, request.session.get('verifyemail'))
-    # 无论验证结果，不能再次验证
-    request.session['verifycode'] = ''
+                         email, request.session.get('verify_email_address'),
+                         verify_email_code, request.session.get('verify_email_code'))
 
     try:
         me = User.objects.get(user_id=request.session['user']['user_id'])
@@ -360,7 +364,8 @@ def verifyemail(request):
         msg.attach_alternative(html_content, "text/html")
         msg.send()
         print("邮件发送成功")
-        request.session['verifyemail'] = code
+        request.session['verify_email_code'] = code
+        request.session['verify_email_address'] = email
         return JsonResponse({'res': 1})
     except Exception:
         print("邮件发送失败")
