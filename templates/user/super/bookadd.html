@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+{% load static %}
+<head>
+    <meta charset="UTF-8">
+    <title>增加书籍</title>
+    <script type="text/javascript" src="{% static 'js/jquery-3.4.1.js' %}"></script>
+    <script type="text/javascript" src="{% static 'js/jquery-ui.js' %}"></script>
+    <script>
+        function getCookie(cname)
+        {
+            var name = cname + "=";
+            var ca = document.cookie.split(';');
+            for(var i=0; i<ca.length; i++)
+            {
+                var c = ca[i].trim();
+                if (c.indexOf(name)==0) return c.substring(name.length,c.length);
+            }
+            return "";
+        }
+
+        $(document).ready(function(){
+            var msg = getCookie('bookCreate');
+            if(msg == 1){
+                alert("创建成功");
+            }else if(msg == 0){
+                alert("创建失败");
+            }
+            document.cookie = "bookCreate=-1;path=/";
+        });
+    </script>
+</head>
+<body>
+    <a href="/user/super/book/1/">返回</a>
+    <form action="/user/super/book/create/" method="post">
+    {% csrf_token %}
+                书名：<input type="text" name="name" value=""/>
+                <hr/>
+                图片：<input type="text" name="pictrue" value=""/>
+                <hr/>
+                售价：<input type="number" name="price" value=""/>
+                <hr/>
+                原价：<input type="number" name="price_old" value=""/>
+                <hr/>
+                作者：<input type="text" name="author" value=""/>
+                <hr/>
+                isbn：<input type="text" name="isbn" value=""/>
+                <hr/>
+                出版社：<input type="text" name="press" value=""/>
+                <hr/>
+                库存：<input type="number" name="rest" value=""/>
+                <hr/>
+                类别：<input type="text" name="kind_name" list="kind_list"/>
+                <datalist id="kind_list">
+                    {% for kind in kinds %}
+                        <option>{{ kind.kind_name }}</option>
+                    {% endfor %}
+                </datalist>
+                <hr/>
+                详细描述：<input type="text" name="description" value=""/>
+                <hr/>
+                <input type="submit" value="提交"/>
+    </form>
+</body>
+</html>

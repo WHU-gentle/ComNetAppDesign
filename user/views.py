@@ -394,7 +394,20 @@ def super_book(request, pageid):
     else:
         return HttpResponseRedirect("/user/super/book/1/")
 
+def super_bookadd(request):
+    allList = Book.objects.all()
+
+    kinds = []
+    for book in allList:
+        kind = {"kind_id": book.kind_id, "kind_name": book.kind_name}
+        if kind not in kinds:
+            kinds.append(kind)
+
+    return render(request, 'user/super/bookadd.html', {"kinds":kinds})
+
+
 def super_bookCreate(request):
+    print("1")
     book_name = request.POST.get("name")
     book_picture = request.POST.get("pictrue")
     price = request.POST.get("price")
@@ -408,53 +421,73 @@ def super_bookCreate(request):
     description = request.POST.get("description")
     sales = 0
 
-    book = Book.objects.create(
-        book_name=book_name,
-        book_picture=book_picture,
-        price=price,
-        price_old=price_old,
-        author=author,
-        isbn=isbn,
-        press=press,
-        rest=rest,
-        kind_id=kind_id,
-        kind_name=kind_name,
-        description=description,
-        sales=sales
-    )
-    return JsonResponse({'msg':"success"})
+    print(kind_name)
+    ret = HttpResponseRedirect("/user/super/book/bookadd/")
+    try:
+        book = Book.objects.create(
+            book_name=book_name,
+            book_picture=book_picture,
+            price=price,
+            price_old=price_old,
+            author=author,
+            isbn=isbn,
+            press=press,
+            rest=rest,
+            kind_id=kind_id,
+            kind_name=kind_name,
+            description=description,
+            sales=sales
+        )
+    except:
+        ret.set_cookie("bookCreate", 0)
+
+    ret.set_cookie("bookCreate", 1);
+    return ret
 
 def super_bookDelete(request, bookid):
+    ret = HttpResponseRedirect("/user/super/book/1/")
+    ret.set_cookie("bookid", bookid)
+    try:
+        book = Book.objects.get(book_id=bookid)
+    except Book.DoesNotExist:
+        ret.set_cookie("bookDelete", 0)
+        return ret
+
+    book = Book.objects.get(book_id=bookid).delete()
+    ret.set_cookie("bookDelete", 1)
+    return ret
+
+def super_bookChange(request, bookid):
     try:
         book = Book.objects.get(book_id=bookid)
     except Book.DoesNotExist:
         return JsonResponse({"msg":"对象不存在", "bookid":bookid})
-    else:
-        book = Book.objects.get(book_id=bookid).delete()
-        return JsonResponse({"msg":"删除成功", "bookid":bookid})
+
+    return render(request, 'user/super/bookchange.html', {"book":book})
 
 def super_bookUpdate(request, bookid):
+    ret = HttpResponseRedirect("/user/super/book/change/"+str(bookid)+"/")
     try:
         book = Book.objects.get(book_id=bookid)
     except Book.DoesNotExist:
-        return JsonResponse({"msg":"对象不存在", "bookid":bookid})
-    else:
-        book.book_name = request.POST.get("name")
-        book.book_picture = request.POST.get("pictrue")
-        book.price = request.POST.get("price")
-        book.price_old = request.POST.get("price_old")
-        book.author = request.POST.get("author")
-        book.isbn = request.POST.get("isbn")
-        book.press = request.POST.get("press")
-        book.rest = request.POST.get("rest")
-        book.kind_name = request.POST.get("kind_name")
-        book.kind_id = Book.objects.filter(kind_name=book.kind_name)[0].kind_id
-        book.description = request.POST.get("description")
-        book.save()
-        return JsonResponse({"msg":"修改成功", "bookid":bookid})
+        ret.set_cookie('bookChange', 0)
+        return ret
 
-def super_user(request, pageid):
-    pass
+    book.book_name = request.POST.get("name")
+    book.book_picture = request.POST.get("pictrue")
+    book.price = request.POST.get("price")
+    book.price_old = request.POST.get("price_old")
+    book.author = request.POST.get("author")
+    book.isbn = request.POST.get("isbn")
+    book.press = request.POST.get("press")
+    book.rest = request.POST.get("rest")
+    book.kind_name = request.POST.get("kind_name")
+    book.kind_id = Book.objects.filter(kind_name=book.kind_name)[0].kind_id
+    book.description = request.POST.get("description")
+    book.save()
+
+    ret.set_cookie('bookChange', 1)
+    return ret
 
 def statistic(request):
     allList = Book.objects.all()

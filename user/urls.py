@@ -21,10 +21,11 @@ urlpatterns = [
     #关于统计信息的超级用户的url
     path('super/', views.super_host, name="super_host"),
     path('super/book/<int:pageid>/', views.super_book, name="super_book"),
+    path('super/book/bookadd/', views.super_bookadd, name="super_bookadd"),
     path('super/book/create/', views.super_bookCreate, name="super_bookCreate"),
     path('super/book/delete/<int:bookid>/', views.super_bookDelete, name="super_bookDelete"),
+    path('super/book/change/<int:bookid>/', views.super_bookChange, name="super_bookChange"),
     path('super/book/update/<int:bookid>/', views.super_bookUpdate, name="super_bookUpdate"),
-    path('super/user/<int:pageid>/', views.super_user, name="super_user"),
     path('super/statistic/', views.statistic, name="statistic"),
 ]
 

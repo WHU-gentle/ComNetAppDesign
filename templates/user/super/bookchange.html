@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+{% load static %}
+<head>
+    <meta charset="UTF-8">
+    <title>修改书籍</title>
+    <script type="text/javascript" src="{% static 'js/jquery-3.4.1.js' %}"></script>
+    <script type="text/javascript" src="{% static 'js/jquery-ui.js' %}"></script>
+    <script>
+        function getCookie(cname)
+        {
+            var name = cname + "=";
+            var ca = document.cookie.split(';');
+            for(var i=0; i<ca.length; i++)
+            {
+                var c = ca[i].trim();
+                if (c.indexOf(name)==0) return c.substring(name.length,c.length);
+            }
+            return "";
+        }
+
+        $(document).ready(function(){
+            var msg = getCookie('bookChange');
+            if(msg == 1){
+                alert("修改成功");
+            }else if(msg == 0){
+                alert("修改失败");
+            }
+            document.cookie = "bookChange=-1;path=/";
+        });
+    </script>
+</head>
+<body>
+    <a href="/user/super/book/1/">返回</a>
+    <h1>修改 《{{ book.book_name }}》的信息 </h1>
+    <form action="/user/super/book/update/{{ book.book_id }}/" method="post">
+    {% csrf_token %}
+                书名：<input type="text" name="name" value="{{ book.book_name }}"/>
+                <hr/>
+                图片：<input type="text" name="pictrue" value="{{ book.book_picture }}"/>
+                <hr/>
+                售价：<input type="number" name="price" value="{{ book.price }}"/>
+                <hr/>
+                原价：<input type="number" name="price_old" value="{{ book.price_old }}"/>
+                <hr/>
+                作者：<input type="text" name="author" value="{{ book.author }}"/>
+                <hr/>
+                isbn：<input type="text" name="isbn" value="{{ book.isbn }}"/>
+                <hr/>
+                出版社：<input type="text" name="press" value="{{ book.press }}"/>
+                <hr/>
+                库存：<input type="number" name="rest" value="{{ book.rest }}"/>
+                <hr/>
+                类别：<input type="text" name="kind_name" value="{{ book.kind_name }}" list="kind_list"/>
+                <datalist id="kind_list">
+                    {% for kind in kinds %}
+                        <option>{{ kind.kind_name }}</option>
+                    {% endfor %}
+                </datalist>
+                <hr/>
+                详细描述：<input type="text" name="description" value="{{ book.description }}"/>
+                <hr/>
+                <input type="submit" value="提交"/>
+    </form>
+</body>
+</html>
