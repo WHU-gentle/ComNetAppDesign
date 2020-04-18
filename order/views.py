@@ -156,7 +156,7 @@ def buynow(request):
 
     order = Order(
         user_id=request.session['user']['user_id'],
-        sum_price=int(number)*int(book.price),
+        sum_price=number*book.price,
         # 订单状态：已取消 0， 待付款 1， 待发货 2， 已发货 3， 已完成 4
         status=1,
         time_submit=datetime.datetime.now()
@@ -184,6 +184,7 @@ def receive(request):
     except Order.MultipleObjectsReturned:
         raise Exception('订单表错误')
     if order.status == 3:
+        # 将可收货的订单收货
         order.status = 4
         order.save()
         return JsonResponse({'res': 1})
@@ -297,7 +298,6 @@ def alipay_query(out_trade_no: str):
         elif result.get("trade_status", "") == "TRADE_CLOSED":
             # 用户超时未支付
             order.status = 0
-            order.time_finish = datetime.datetime.now()
             order.save()
             return {'res': 1, 'status': 0}
 
@@ -317,8 +317,7 @@ def order_status_update(order: Order):
             result = alipay_query(build_trade_no(order.order_id, order.time_submit))
             print('alipay_query %d' % result['res'])
             if result['res'] == 1:
-                order.status = result['status']
-                order.save()
+                # 订单已经更新过
                 return
             tot -= 1
             if tot == 0:
