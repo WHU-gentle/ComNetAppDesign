@@ -41,21 +41,25 @@ def login_check(request):
     verifycode = request.POST.get('verifycode')
 
     # 2.数据校验
-    if not all([user_name, password, remember, verifycode]):
-        # 有数据为空
-        return JsonResponse({'res': 0, 'errmsg': '不能为空'})
-
-    if verifycode.upper() != request.session['verifycode'].upper():
-        return JsonResponse({'res': 0, 'errmsg': '验证码错误'})
-
-    # 3.进行处理:根据用户名和密码查找账户信息
     try:
-        user = User.objects.get(user_name=request.POST['user_name'])
-    except User.DoesNotExist:
-        return JsonResponse({'res': 0, 'errmsg': '用户不存在'})
-    else:
-        if user.password != request.POST['password']:
-            return JsonResponse({'res': 0, 'errmsg': '密码错误'})
+        if not all([user_name, password, remember, verifycode]):
+            # 有数据为空
+            raise Exception('不能为空')
+        if verifycode.upper() != request.session['verifycode'].upper():
+            raise Exception('验证码错误')
+        # 3.进行处理:根据用户名和密码查找账户信息
+        try:
+            user = User.objects.get(user_name=request.POST['user_name'])
+        except User.DoesNotExist:
+            raise Exception('用户不存在')
+        else:
+            if user.password != request.POST['password']:
+                raise Exception('密码错误')
+    except Exception as e:
+        # 原验证码失效
+        request.session['verifycode'] = ''
+        return JsonResponse({'res': 0, 'errmsg': str(e)})
+
     next_url = '../../'
     jres = JsonResponse({'res': 1, 'next_url': next_url})
 

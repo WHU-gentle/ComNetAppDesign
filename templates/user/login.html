@@ -26,6 +26,7 @@
                 console.debug(data.errmsg);
                 if (data.res == 0){
                     $('#user_name').next().html(data.errmsg).show()
+                    $('#verifycode').click()
                 }
                 else
                 {
