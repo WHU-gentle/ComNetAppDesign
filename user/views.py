@@ -405,9 +405,7 @@ def super_bookadd(request):
 
     return render(request, 'user/super/bookadd.html', {"kinds":kinds})
 
-
 def super_bookCreate(request):
-    print("1")
     book_name = request.POST.get("name")
     book_picture = request.POST.get("pictrue")
     price = request.POST.get("price")
@@ -516,11 +514,6 @@ def statistic(request):
         book_kind = book.kind_id;
         for i in range(len(kinds)):
             if kinds[i]['kind_id'] == book_kind:
-                print("----")
-                print(type(kinds[i]['kind_sale']))
-                print(type(book.sales))
-                print(type(book.price))
-
                 kinds[i]['kind_sale'] = kinds[i]['kind_sale'] + book.sales * book.price
                 kinds[i]['kind_num'] += book.sales
                 if kinds[i]['kind_maxNumBook'] == None:
@@ -552,3 +545,33 @@ def statistic(request):
                 all_stat['all_minSaleKind'] = kind
 
     return render(request, 'user/super/statistic.html', {"books": allList, "kinds": kinds, "all_stat": all_stat})
+
+from order.models import Order
+from user.models import User
+def super_order(request, pageid):
+    orderList = Order.objects.filter(status=1)
+    paginator = Paginator(orderList, 20)
+    if pageid in paginator.page_range:
+        page = paginator.page(pageid)
+        num = paginator.count
+        userList = []
+        for order in page.object_list:
+            user = User.objects.get(user_id=order.user_id)
+            userList.append({"username":user.user_name, "address":user.address ,"orderid":order.order_id})
+        return render(request, 'user/super/order.html', {"orders":page, "num":num, "userList":userList})
+    else:
+        return HttpResponseRedirect("/user/super/order/1/")
+
+def super_orderSta(request, orderid):
+    ret = HttpResponseRedirect("/user/super/order/1/")
+    ret.set_cookie("orderid", orderid)
+    try:
+        order = Order.objects.get(order_id=orderid)
+    except Book.DoesNotExist:
+        ret.set_cookie("orderSta", 0)
+        return ret
+
+    order.status += 1
+    order.save()
+    ret.set_cookie("orderSta", 1)
+    return ret

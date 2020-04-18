@@ -27,6 +27,8 @@ urlpatterns = [
     path('super/book/change/<int:bookid>/', views.super_bookChange, name="super_bookChange"),
     path('super/book/update/<int:bookid>/', views.super_bookUpdate, name="super_bookUpdate"),
     path('super/statistic/', views.statistic, name="statistic"),
+    path('super/order/<int:pageid>/', views.super_order, name="super_oder"),
+    path('super/order/status/<int:orderid>/', views.super_orderSta),
 ]
 
 
