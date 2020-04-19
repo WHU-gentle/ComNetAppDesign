@@ -2,6 +2,7 @@
 <html lang="en">
 {% load static %}
 <head>
+    <style>a{text-decoration: none}</style>
     <meta charset="UTF-8">
     <title>书籍管理</title>
     <script type="text/javascript" src="{% static 'js/jquery-3.4.1.js' %}"></script>
@@ -32,35 +33,45 @@
     </script>
 </head>
 <body>
-    <a href="/user/super/">返回</a>
+    <a href="/user/super/"> <img src="{% static 'images/return.png' %}" style="width: 20px; height: 20px;"></a>
+    <h1><center>图书管理</center></h1>
+    <hr/>
+
     <div>
-        <div>
-            <a href="/user/super/book/bookadd/">添加书籍</a>
-        </div>
 
         <div>
             {% for book in books %}
                 <div>
-                    {{book.book_name}}<br>
+                    <span style="font-weight: bold;margin-right:20px">{{book.book_name}}</span>
                     <a href="/user/super/book/change/{{ book.book_id }}/">修改</a>
                     <a href="/user/super/book/delete/{{ book.book_id }}/">删除</a>
+                    <hr/>
                 </div>
             {% endfor %}
         </div>
+        <div style="font-weight: bold;font-size:20px">
+            <a href="/user/super/book/bookadd/">添加书籍</a>
+        </div>
 
-        <div>
+
+    </div>
+
+<br><br><br><br><br>
+
+<div style="font-weight: bold;font-size: larger;margin-left: 400px">
+            <div style="float:left;margin-left:30px;">Page</div>
             {% for page in books.paginator.page_range %}
                 {% if books.number == page %}
-                    <div>
+                    <div style="float:left;margin-left:30px;">
                         {{ page }}
                     </div>
                 {% else %}
-                    <div>
+                    <div style="float:left;margin-left:30px;">
                         <a href="/user/super/book/{{ page }}/">{{ page }}</a>
                     </div>
                 {% endif %}
             {% endfor %}
-        </div>
     </div>
+</center>
 </body>
 </html>

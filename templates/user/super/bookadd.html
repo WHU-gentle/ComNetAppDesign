@@ -29,37 +29,77 @@
             document.cookie = "bookCreate=-1;path=/";
         });
     </script>
+
+    <style>
+    .reg_form{width:360px;margin:30px 0 0 30px;float:left;position:relative;}
+    .reg_form li{height:50px;list-style: none;}
+    .reg_form li label{width:70px;height:30px;line-height:30px;float:left;font-size:14px;color:#a8a8a8}
+    .reg_form li input{width:240px;height:30px;border:1px solid #e0e0e0;float:left;outline:none;text-indent:10px;background-color:#f8f8f8}
+    .reg_form li.reg_sub input{width:320px;height:40px;background-color:#4277ad;font-size:18px;color:#fff;font-family:'Microsoft Yahei';cursor:pointer;}
+    </style>
 </head>
 <body>
-    <a href="/user/super/book/1/">返回</a>
-    <form action="/user/super/book/create/" method="post">
-    {% csrf_token %}
-                书名：<input type="text" name="name" value=""/>
-                <hr/>
-                图片：<input type="text" name="pictrue" value=""/>
-                <hr/>
-                售价：<input type="number" name="price" value=""/>
-                <hr/>
-                原价：<input type="number" name="price_old" value=""/>
-                <hr/>
-                作者：<input type="text" name="author" value=""/>
-                <hr/>
-                isbn：<input type="text" name="isbn" value=""/>
-                <hr/>
-                出版社：<input type="text" name="press" value=""/>
-                <hr/>
-                库存：<input type="number" name="rest" value=""/>
-                <hr/>
-                类别：<input type="text" name="kind_name" list="kind_list"/>
-                <datalist id="kind_list">
-                    {% for kind in kinds %}
-                        <option>{{ kind.kind_name }}</option>
-                    {% endfor %}
-                </datalist>
-                <hr/>
-                详细描述：<input type="text" name="description" value=""/>
-                <hr/>
-                <input type="submit" value="提交"/>
-    </form>
+    <a href="/user/super/book/1/"><img src="{% static 'images/return.png' %}" style="width: 20px; height: 20px;"></a>
+    <h1><center>添加图书信息 </center></h1>
+
+    <div style="margin-left:500px">
+            <div class="reg_form clearfix">
+                <form action="/user/super/book/create/" method="post">
+                {% csrf_token %}
+                <ul>
+                    <li>
+                        <label>书名:</label>
+                        <input type="text" name="name" value=""/>
+                    </li>
+                    <li>
+                        <label>图片:</label>
+                        <input type="text" name="pictrue" value=""/>
+                    </li>
+                    <li>
+                        <label>售价:</label>
+                        <input type="number" name="price" value=""/>
+                    </li>
+                    <li>
+                        <label>原价:</label>
+                        <input type="number" name="price_old" value=""/>
+                    </li>
+                    <li>
+                        <label>作者:</label>
+                        <input type="text" name="author" value=""/>
+                    </li>
+                    <li>
+                        <label> isbn:</label>
+                        <input type="text" name="isbn" value=""/>
+                    </li>
+                    <li>
+                        <label>出版社:</label>
+                        <input type="text" name="press" value=""/>
+                    </li>
+                    <li>
+                        <label> 库存:</label>
+                        <input type="number" name="rest" value=""/>
+                    </li>
+                    <li>
+                        <label>类别:</label>
+                        <input type="text" name="kind_name" list="kind_list"/>
+                        <datalist id="kind_list">
+                            {% for kind in kinds %}
+                                 <option>{{ kind.kind_name }}</option>
+                            {% endfor %}
+                        </datalist>
+                    </li>
+                    <li>
+                        <label> 详细描述:</label>
+                        <input type="text" name="description" value=""/>
+                    </li>
+                    <li class="reg_sub">
+                        <input type="submit" value="提交"/>
+                    </li>
+                </ul>
+                </form>
+            </div>
+    </div>
+
+
 </body>
 </html>
