@@ -2,6 +2,13 @@
 {% load static %}
 {% block title %}珞珈线上书店-首页{% endblock title %}
 {% block topfiles %}
+    <style>
+    .reg_form{width:360px;margin:30px 0 0 30px;float:left;position:relative;}
+.reg_form li{height:50px;}
+.reg_form li label{width:70px;height:30px;line-height:30px;float:left;font-size:14px;color:#a8a8a8}
+.reg_form li input{width:288px;height:30px;border:1px solid #e0e0e0;float:left;outline:none;text-indent:10px;background-color:#f8f8f8}
+.reg_form li.reg_sub input{width:360px;height:40px;background-color:#4277ad;font-size:18px;color:#fff;font-family:'Microsoft Yahei';cursor:pointer;}
+    </style>
 <script>
     $(function () {
         $('#btnSendEmail').click(function () {
@@ -30,19 +37,52 @@
 {% endblock topfiles %}
 {% block body %}
 
+<div style="margin-left:500px">
+        <div class="">
+            <div class="reg_form clearfix">
+                <form action="{% url 'user:result' %}" method="post">
+                {% csrf_token %}
+                <ul>
+                    <li>
+                        <label>用户名:</label>
+                        <input type="text" name="user_name">
+                    </li>
+                    <li>
+                        <label>密码:</label>
+                        <input type="password" name="password">
+                    </li>
+                    <li>
+                        <label>确认密码:</label>
+                        <input type="password" name="repeat_password">
+                    </li>
+                    <li>
+                        <label>电话:</label>
+                        <input type="text" name="phone_number">
+                    </li>
+                    <li>
+                        <label>地址:</label>
+                        <input type="text" name="address">
+                    </li>
+                    <li>
+                        <label>电子邮箱:</label>
+                        <input type="text" name="email">
+                    </li>
+                    <li>
+                        <label>验证码:</label>
+                        <input type="text" name="verify_email_code">
+                    </li>
+                    <li class="reg_sub">
+                        <input type="button" id="btnSendEmail" value="发送验证邮件">
+                        <input type="submit" value="注册">
+                    </li>
+                </ul>
+                </form>
+            </div>
+        </div>
 
-    <form action="{% url 'user:result' %}" method="post">
-        {% csrf_token %}
-        用户名：<input type="text" name="user_name"> <br>
-        密码：<input type="password" name="password"> <br>
-        确认密码：<input type="password" name="repeat_password"> <br>
-        电话：<input type="text" name="phone_number"> <br>
-        地址：<input type="text" name="address"> <br>
-        电子邮箱：<input type="text" name="email">
-<!--        <div class="user_error">输入错误</div>-->
-        <br>
-        验证码：<input type="text" name="verify_email_code"> <br>
-        <input type="button" id="btnSendEmail" value="发送验证邮件">
-        <input type="submit" value="注册"> <br>
-    </form>
+</div>
+
+<br><br><br><br><br><br><br><br><br><br>
+<br><br><br><br><br><br><br><br><br><br>
+<br><br><br><br><br><br><br><br><br><br>
 {% endblock body %}
