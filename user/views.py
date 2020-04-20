@@ -5,6 +5,8 @@ from django.forms.models import model_to_dict
 from .models import User, Cart
 from book.models import Book
 
+from bookstore.views import login_needful
+
 import datetime
 
 # Create your views here.
@@ -40,7 +42,7 @@ def user_session_login(request, user: User):
         'phone_number': user.phone_number,
         'address': user.address,
         'email': user.email,
-        'register_date': user.register_date.strftime("%Y-%m-%d %H:%M:%S"),
+        'register_date': user.register_date.strftime("%Y-%m-%d"),
     }
 
 
@@ -85,31 +87,24 @@ def login_check(request):
 
     # 记住用户的登录状态
     user_session_login(request, user)
-    cache_clean()
     return jres
 
 
+@login_needful
 def detail(request):
-    if request.session.get('islogin', False):
-        context = {
-            'user_name': request.session['user']['user_name'],
-            'phone_number': request.session['user']['phone_number'],
-            'address': request.session['user']['address'],
-            'email': request.session['user']['email'],
-            'register_date': request.session['user']['register_date'],
-        }
-        return render(request, 'user/detail.html', context)
-    else:
-        raise Http404
+    context = {
+        'user_name': request.session['user']['user_name'],
+        'phone_number': request.session['user']['phone_number'],
+        'address': request.session['user']['address'],
+        'email': request.session['user']['email'],
+        'register_date': request.session['user']['register_date'],
+    }
+    return render(request, 'user/detail.html', context)
 
 
-def cache_clean():
-    pass
-
-
+@login_needful
 def logout(request):
     request.session.flush()
-    cache_clean()
     # 跳转到首页
     return redirect(reverse('index'))
 
@@ -257,25 +252,23 @@ def result(request):
 #         return JsonResponse({'res': 0, 'errmsg': '\n'.join(res['error_message'])})
 
 
+@login_needful
 def cart(request):
-    if request.session.get('islogin', False):
-        u_name = request.session['user']['user_name']
-        u_id = User.objects.get(user_name=u_name).user_id
-        cart_list = Cart.objects.filter(user_id=u_id)
+    u_name = request.session['user']['user_name']
+    u_id = User.objects.get(user_name=u_name).user_id
+    cart_list = Cart.objects.filter(user_id=u_id)
 
-        # 购物车选中的商品件数：前端计算
-        # 购物车所有商品种类数
-        total_kinds_count = 0
-        cart_data = []
-        for cart in cart_list:
-            total_kinds_count += 1
-            cart = model_to_dict(cart)
-            book = Book.objects.get(book_id=cart['book_id'])
-            cart['book'] = book
-            cart_data.append(cart)
-        return render(request, 'user/cart.html', {'cart_list': cart_data, 'total_kinds_count': total_kinds_count})
-    else:
-        return render(request, 'user/login.html')
+    # 购物车选中的商品件数：前端计算
+    # 购物车所有商品种类数
+    total_kinds_count = 0
+    cart_data = []
+    for cart in cart_list:
+        total_kinds_count += 1
+        cart = model_to_dict(cart)
+        book = Book.objects.get(book_id=cart['book_id'])
+        cart['book'] = book
+        cart_data.append(cart)
+    return render(request, 'user/cart.html', {'cart_list': cart_data, 'total_kinds_count': total_kinds_count})
 
 
 # def order(request):

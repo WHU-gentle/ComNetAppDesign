@@ -7,6 +7,9 @@ from .models import Book
 from django.db.models import Q
 import datetime
 
+from bookstore.views import login_needful_json_res_0_errmsg
+
+
 # Create your views here.
 
 
@@ -56,10 +59,12 @@ def kind(request, kind_id):
         books.append(book_detail)
     return render(request, 'book/kind.html', {'books': books, 'kind_name': kind_name})
 
+
 def search(request):
     keyword = request.POST.get('keyword')
-    bookList = Book.objects.filter(Q(book_name__contains=keyword) | Q(author__contains=keyword) | Q(press__contains=keyword))\
-                            .order_by('-sales')
+    bookList = Book.objects.filter(
+        Q(book_name__contains=keyword) | Q(author__contains=keyword) | Q(press__contains=keyword)) \
+        .order_by('-sales')
 
     books = []
     for book in bookList:
@@ -79,6 +84,7 @@ def search(request):
 
 
 # 用户将number本书加入购物车（缺省1本）
+@login_needful_json_res_0_errmsg
 def buy(request):
     if request.method == 'POST':
         return JsonResponse({'res': 0, 'errmsg': '访问方式错误'})
@@ -120,11 +126,13 @@ def buy(request):
         raise Exception('购物车中同一商品出现多次')
     else:
         # 之前存在,数量+number
-        Cart.objects.filter(user_id=request.session['user']['user_id'], book_id=book_id)\
+        Cart.objects.filter(user_id=request.session['user']['user_id'], book_id=book_id) \
             .update(number=now.number + number)
-    return JsonResponse({'res': 1, 'msg':'您成功添加了'+str(number)+'本'+str(book.book_name)})
+    return JsonResponse({'res': 1, 'msg': '您成功添加了' + str(number) + '本' + str(book.book_name)})
+
 
 # 删除用户购物车中商品的信息
+@login_needful_json_res_0_errmsg
 def cancel(request):
     try:
         book_id = int(request.GET.get('book_id'))
@@ -146,6 +154,7 @@ def cancel(request):
 
 
 # 购物车书数量设置为
+@login_needful_json_res_0_errmsg
 def set_number(request):
     try:
         book_id = int(request.GET.get('book_id'))
@@ -188,6 +197,7 @@ def set_number(request):
 
 
 # 购物车书选中状态反转
+@login_needful_json_res_0_errmsg
 def select(request):
     try:
         book_id = int(request.GET.get('book_id'))
@@ -206,17 +216,14 @@ def select(request):
     return JsonResponse({'res': 1})
 
 
+@login_needful_json_res_0_errmsg
 def count(request):
-    if request.session.get('islogin', False):
-        cart_list = Cart.objects.filter(user_id=request.session['user']['user_id'])
-        return JsonResponse({'res': len(cart_list)})
-    else:
-        return JsonResponse({'res': -1})
+    cart_list = Cart.objects.filter(user_id=request.session['user']['user_id'])
+    return JsonResponse({'res': len(cart_list)})
 
 
+@login_needful_json_res_0_errmsg
 def select_count(request):
-    if not request.session['islogin']:
-        return JsonResponse({'res': 0})
     count = 0
     for cart in Cart.objects.filter(user_id=request.session['user']['user_id'], select=True):
         count += cart.number

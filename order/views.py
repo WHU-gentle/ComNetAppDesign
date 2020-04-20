@@ -18,7 +18,10 @@ from alipay import AliPay  # https://blog.csdn.net/appleyuchi/article/details/10
 import qrcode, time
 import urllib
 
+from bookstore.views import login_needful, login_needful_json_res_0_errmsg
 
+
+@login_needful
 def all(request):
     user_id = request.session['user']['user_id']
 
@@ -55,6 +58,7 @@ def all(request):
     return render(request, 'order/all.html', content)
 
 
+@login_needful
 def detail(request, order_id: int):
     content = {}
     # 订单本身的信息
@@ -108,6 +112,7 @@ def detail(request, order_id: int):
 
 
 # 创建订单
+@login_needful
 def new(request):
     order = Order(
         # order_id =
@@ -144,7 +149,9 @@ def new(request):
     print(order.order_id)
     return redirect("/order/detail/%d" % order.order_id)
 
+
 # 立即购买
+@login_needful_json_res_0_errmsg
 def buynow(request):
     try:
         book_id = int(request.GET.get('book_id'))
@@ -171,6 +178,8 @@ def buynow(request):
     )
     return JsonResponse({'res':1, 'order_id':order.order_id})
 
+
+@login_needful_json_res_0_errmsg
 def receive(request):
     try:
         order_id = int(request.GET.get('order_id'))
