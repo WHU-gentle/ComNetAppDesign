@@ -1,26 +1,33 @@
 from django.shortcuts import render, redirect, reverse
-from django.http import Http404, HttpResponse, JsonResponse
+from django.http import HttpResponse, JsonResponse, HttpResponseRedirect
 from django.forms.models import model_to_dict
-
-from .models import User, Cart
-from book.models import Book
+from django.core.paginator import Paginator
+from django.core.mail import EmailMultiAlternatives
+from django.conf import settings
 
 from bookstore.views import login_needful
 
+from .models import Cart
+from book.models import Book
+from order.models import Order
+from user.models import User
+
 import datetime
 
+import time
+# 引入绘图模块
+from PIL import Image, ImageDraw, ImageFont
+# 引入随机函数模块
+import random
+# 内存文件操作
+import io
+
+
 # Create your views here.
-'''
-安全性Bug：
-每次输错验证码后端强制让原验证码失效（所有前端内容均可能被篡改），前端重新获取
-发送验证邮件前也应该输入验证码/设置时间间隔
-尽可能缩短验证码有效时间（验证成功/失败后失效，过期失效）
-确保验证邮件的地址和最终注册地址相同，避免绑定错误的邮箱
-'''
 
 
-def login(request):
-    '''显示登录页面'''
+def login(request) -> HttpResponse:
+    """显示登录页面"""
     if request.COOKIES.get("user_name"):
         user_name = request.COOKIES.get("user_name")
         checked = 'checked'
@@ -34,7 +41,8 @@ def login(request):
     return render(request, 'user/login.html', context)
 
 
-def user_session_login(request, user: User):
+def user_session_login(request, user: User) -> None:
+    """将用户信息写入会话"""
     request.session['islogin'] = True
     request.session['user'] = {
         'user_id': user.user_id,
@@ -46,8 +54,8 @@ def user_session_login(request, user: User):
     }
 
 
-def login_check(request):
-    '''进行用户登录校验'''
+def login_check(request) -> JsonResponse:
+    """进行用户登录校验"""
     # 1.获取数据
     user_name = request.POST.get('user_name')
     password = request.POST.get('password')
@@ -70,9 +78,10 @@ def login_check(request):
             if user.password != request.POST['password']:
                 raise Exception('密码错误')
     except Exception as e:
+        return JsonResponse({'res': 0, 'errmsg': str(e)})
+    finally:
         # 原验证码失效
         request.session['verifycode'] = ''
-        return JsonResponse({'res': 0, 'errmsg': str(e)})
 
     next_url = '../../'
     jres = JsonResponse({'res': 1, 'next_url': next_url})
@@ -91,7 +100,8 @@ def login_check(request):
 
 
 @login_needful
-def detail(request):
+def detail(request) -> HttpResponse:
+    """用户信息详情"""
     context = {
         'user_name': request.session['user']['user_name'],
         'phone_number': request.session['user']['phone_number'],
@@ -104,21 +114,33 @@ def detail(request):
 
 @login_needful
 def logout(request):
+    """登出"""
     request.session.flush()
     # 跳转到首页
     return redirect(reverse('index'))
 
 
-def register(request):
+def register(request) -> HttpResponse:
+    """注册"""
     return render(request, 'user/register.html')
 
 
-def register_check(user_name, password, repeat_password, phone_number, address,
-                   email, verify_email_address, code, verify_email_code):
+def register_check(user_name: str, password: str, repeat_password: str, phone_number: str, address: str,
+                   email: str, verify_email_address: str, code: str, verify_email_code: str):
+    """
+    注册信息检测
+    :param user_name: 用户名
+    :param password: 密码
+    :param repeat_password: 重复输入密码
+    :param phone_number: 电话号码
+    :param address: 地址
+    :param email: 电子邮件
+    :param verify_email_address: 验证邮件时会话记录的邮箱地址
+    :param code: 验证码
+    :param verify_email_code: 会话记录的验证码
+    :return: 注册信息是否正确
+    """
     error_message = []
-    '''
-    用户信息限制：    （中文字符占用空间？）
-    '''
     error_status = 0
     # 用户名：不为空，不超过16个字符
     if user_name == '':
@@ -138,7 +160,7 @@ def register_check(user_name, password, repeat_password, phone_number, address,
     if password != repeat_password:
         error_status |= 4
         error_message.append('两次输入的密码不一致')
-    # 电话：不为空，不超过20， TODO 只含以下字符0123456789 +-() 如"(+86) 0311 8697-6542"
+    # 电话：不为空，不超过20
     if phone_number == '':
         error_status |= 8
         error_message.append('电话号码为空')
@@ -177,6 +199,7 @@ def register_check(user_name, password, repeat_password, phone_number, address,
 
 
 def result(request):
+    """执行注册，跳转到主页或失败信息页"""
     if request.method != 'POST':
         return render(request, 'user/result.html', {'error_message': '访问方式错误'})
     user_name = request.POST.get('user_name')
@@ -187,6 +210,7 @@ def result(request):
     email = request.POST.get('email')
     verify_email_code = request.POST.get('verify_email_code')
 
+    # 检查注册信息
     res = register_check(user_name, password, repeat_password, phone_number, address,
                          email, request.session.get('verify_email_address'),
                          verify_email_code, request.session.get('verify_email_code'))
@@ -203,7 +227,8 @@ def result(request):
         return render(request, 'user/result.html',
                       {'error_message': res['error_message'], 'error_status': res['error_status']})
 
-#
+
+# TODO 更新个人信息
 # def register_update(request):
 #     if request.method != 'POST':
 #         return JsonResponse({'res': 0, 'error_message': '访问方式错误'})
@@ -248,12 +273,13 @@ def result(request):
 #         )
 #         return JsonResponse({'res': 1})
 #     else:
-#         # TODO 有一个报错Expected type 'Iterable[str]', got 'int' instead ??
+#         # 有一个报错Expected type 'Iterable[str]', got 'int' instead ??
 #         return JsonResponse({'res': 0, 'errmsg': '\n'.join(res['error_message'])})
 
 
 @login_needful
-def cart(request):
+def cart(request) -> HttpResponse:
+    """购物车中的商品信息"""
     u_name = request.session['user']['user_name']
     u_id = User.objects.get(user_name=u_name).user_id
     cart_list = Cart.objects.filter(user_id=u_id)
@@ -275,39 +301,34 @@ def cart(request):
 #     return render(request, 'user/order.html')
 
 
-# 引入绘图模块
-from PIL import Image, ImageDraw, ImageFont
-# 引入随机函数模块
-import random
-# 内存文件操作
-import io
-
-
-def verifycode(request):
+def verifycode(request) -> HttpResponse:
+    """会话记录验证码，返回图片"""
+    # 设置画面
     # 定义变量，用于画面的背景色、宽、高
     bgcolor = (random.randrange(20, 100), random.randrange(20, 100), 255)
     width = 100
     height = 25
     # 创建画面对象
     im = Image.new('RGB', (width, height), bgcolor)
+
+    # 绘制噪点
     # 创建画笔对象
     draw = ImageDraw.Draw(im)
-    # 调用画笔的point()函数绘制噪点
+    # 差异颜色随机绘制噪点
     for i in range(0, 100):
         xy = (random.randrange(0, width), random.randrange(0, height))
         fill = (random.randrange(0, 255), 255, random.randrange(0, 255))
         draw.point(xy, fill=fill)
+
+    # 绘制验证码
     # 定义验证码的备选值
-    # 除去大写I 小写L 字母O 数字0 1
     str1 = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'
     # 随机选取4个值作为验证码
     rand_str = ''
     for i in range(0, 4):
         rand_str += str1[random.randrange(0, len(str1))]
     # 构造字体对象
-    # font = ImageFont.truetype(os.path.join(settings.BASE_DIR, "Ubuntu-RI.ttf"), 15)
     font = ImageFont.truetype("courbd.ttf", 15)
-
     # 构造字体颜色
     fontcolor = (255, random.randrange(0, 255), random.randrange(0, 255))
     # 绘制4个字
@@ -317,42 +338,27 @@ def verifycode(request):
     draw.text((75, 2), rand_str[3], font=font, fill=fontcolor)
     # 释放画笔
     del draw
+
     # 存入session，用于做进一步验证
     request.session['verifycode'] = rand_str
-    print(rand_str)
-
-    buf = io.BytesIO()
     # 将图片保存在内存中，文件类型为png
+    buf = io.BytesIO()
     im.save(buf, 'png')
     # 将内存中的图片数据返回给客户端，MIME类型为图片png
     return HttpResponse(buf.getvalue(), 'image/png')
-    # with open('tmp.png', 'wb') as f:
-    #     f.write(buf.getvalue())
 
 
-import smtplib
-from email.mime.text import MIMEText
-from email.utils import formataddr
-import random
-import time
-import re
-
-from django.conf import settings
-from django.core.mail import EmailMultiAlternatives
-
-
-def verifyemail(request):
+def verifyemail(request) -> JsonResponse:
+    """会话保存验证邮箱地址、验证码，发送验证邮件"""
     email = request.POST.get('email')
-    if not re.match(r'^[a-z0-9][\w\.\-]*@[a-z0-9\-]+(\.[a-z]{2,5}){1,2}$', email):  # TODO 电子邮箱格式
-        # 邮箱不合法
-        return JsonResponse({'res': 0, 'errmsg': '地址格式错误'})
 
-    # 生成验证码
+    # 生成6位数字，作为验证码
     random.seed(time.time())
     code = '%d%d%d%d%d%d' % (random.randint(0, 9), random.randint(0, 9), random.randint(0, 9),
                              random.randint(0, 9), random.randint(0, 9), random.randint(0, 9))
 
-    # 邮件内容
+    # 设置邮件内容
+    # 设置发送邮箱、主题、文本内容和html内容
     from_email = settings.DEFAULT_FROM_EMAIL
     subject = '珞珈网上书店 验证码'
     text_content = '验证码:' + code
@@ -362,38 +368,21 @@ def verifyemail(request):
         msg = EmailMultiAlternatives(subject, text_content, from_email, [email])
         msg.attach_alternative(html_content, "text/html")
         msg.send()
-        print("邮件发送成功")
+        # 记录验证码和邮箱地址
         request.session['verify_email_code'] = code
         request.session['verify_email_address'] = email
         return JsonResponse({'res': 1})
     except Exception:
-        print("邮件发送失败")
         return JsonResponse({'res': 0, 'errmsg': '邮件发送失败'})
 
-def super_host(request):
+
+def super_host(request) -> HttpResponse:
+    """管理员主页"""
     return render(request, 'user/super/host.html')
 
-from book.models import Book
-from django.core.paginator import Paginator
-from django.http import HttpResponseRedirect
+
 def super_book(request, pageid):
-    allList = Book.objects.all()
-
-    kinds = []
-    for book in allList:
-        kind = {"kind_id":book.kind_id, "kind_name":book.kind_name}
-        if kind not in kinds:
-            kinds.append(kind)
-
-    paginator = Paginator(allList, 10)
-    if pageid in paginator.page_range:
-        page = paginator.page(pageid)
-        num = paginator.count
-        return render(request, 'user/super/book.html', {"books":page, "num":num, "kinds":kinds})
-    else:
-        return HttpResponseRedirect("/user/super/book/1/")
-
-def super_bookadd(request):
+    """管理图书页，10本数分一页"""
     allList = Book.objects.all()
 
     kinds = []
@@ -402,9 +391,30 @@ def super_bookadd(request):
         if kind not in kinds:
             kinds.append(kind)
 
-    return render(request, 'user/super/bookadd.html', {"kinds":kinds})
+    paginator = Paginator(allList, 10)
+    if pageid in paginator.page_range:
+        page = paginator.page(pageid)
+        num = paginator.count
+        return render(request, 'user/super/book.html', {"books": page, "num": num, "kinds": kinds})
+    else:
+        return HttpResponseRedirect("/user/super/book/1/")
+
+
+def super_bookadd(request) -> HttpResponse:
+    """管理员填写新图书信息，只能选择已有类别"""
+    allList = Book.objects.all()
+
+    kinds = []
+    for book in allList:
+        kind = {"kind_id": book.kind_id, "kind_name": book.kind_name}
+        if kind not in kinds:
+            kinds.append(kind)
+
+    return render(request, 'user/super/bookadd.html', {"kinds": kinds})
+
 
 def super_bookCreate(request):
+    """管理员新增图书，返回执行结果"""
     book_name = request.POST.get("name")
     book_picture = request.POST.get("pictrue")
     price = request.POST.get("price")
@@ -418,10 +428,9 @@ def super_bookCreate(request):
     description = request.POST.get("description")
     sales = 0
 
-    print(kind_name)
     ret = HttpResponseRedirect("/user/super/book/bookadd/")
     try:
-        book = Book.objects.create(
+        Book.objects.create(
             book_name=book_name,
             book_picture=book_picture,
             price=price,
@@ -438,10 +447,12 @@ def super_bookCreate(request):
     except:
         ret.set_cookie("bookCreate", 0)
 
-    ret.set_cookie("bookCreate", 1);
+    ret.set_cookie("bookCreate", 1)
     return ret
 
-def super_bookDelete(request, bookid):
+
+def super_bookDelete(request, bookid: int) -> HttpResponseRedirect:
+    """管理员执行删除图书，返回执行结果"""
     ret = HttpResponseRedirect("/user/super/book/1/")
     ret.set_cookie("bookid", bookid)
     try:
@@ -454,16 +465,20 @@ def super_bookDelete(request, bookid):
     ret.set_cookie("bookDelete", 1)
     return ret
 
-def super_bookChange(request, bookid):
+
+def super_bookChange(request, bookid: int):
+    """管理员图书信息修改界面"""
     try:
         book = Book.objects.get(book_id=bookid)
     except Book.DoesNotExist:
-        return JsonResponse({"msg":"对象不存在", "bookid":bookid})
+        return JsonResponse({"msg": "对象不存在", "bookid": bookid})
 
-    return render(request, 'user/super/bookchange.html', {"book":book})
+    return render(request, 'user/super/bookchange.html', {"book": book})
 
-def super_bookUpdate(request, bookid):
-    ret = HttpResponseRedirect("/user/super/book/change/"+str(bookid)+"/")
+
+def super_bookUpdate(request, bookid) -> HttpResponseRedirect:
+    """管理员修改书籍信息，返回执行结果"""
+    ret = HttpResponseRedirect("/user/super/book/change/" + str(bookid) + "/")
     try:
         book = Book.objects.get(book_id=bookid)
     except Book.DoesNotExist:
@@ -486,28 +501,24 @@ def super_bookUpdate(request, bookid):
     ret.set_cookie('bookChange', 1)
     return ret
 
-def statistic(request):
+
+def statistic(request) -> HttpResponse:
+    """统计各类书籍销售情况"""
     allList = Book.objects.all()
 
+    # 汇总各类别信息
     kinds = []
     for book in allList:
         kind = {
-            'kind_id':book.kind_id,
-            'kind_name':book.kind_name,
-            'kind_sale':0.0,              #本类书籍销售额
-            'kind_num':0,               #本类书籍销售量
-            'kind_maxNumBook':None,            #本类最大销售量书籍
-            'kind_minNumBook':None             #本类最小销售量书籍
+            'kind_id': book.kind_id,
+            'kind_name': book.kind_name,
+            'kind_sale': 0.0,  # 本类书籍销售额
+            'kind_num': 0,  # 本类书籍销售量
+            'kind_maxNumBook': None,  # 本类最大销售量书籍
+            'kind_minNumBook': None  # 本类最小销售量书籍
         }
         if kind not in kinds:
             kinds.append(kind)
-
-    all_stat = {
-        'all_sale':0,
-        'all_num':0,
-        'all_maxSaleKind':None,
-        'all_minSaleKind':None
-    }
 
     for book in allList:
         book_kind = book.kind_id;
@@ -515,29 +526,36 @@ def statistic(request):
             if kinds[i]['kind_id'] == book_kind:
                 kinds[i]['kind_sale'] = kinds[i]['kind_sale'] + book.sales * book.price
                 kinds[i]['kind_num'] += book.sales
-                if kinds[i]['kind_maxNumBook'] == None:
+                if kinds[i]['kind_maxNumBook'] is None:
                     kinds[i]['kind_maxNumBook'] = book
                 else:
                     if book.sales > kinds[i]['kind_maxNumBook'].sales:
                         kinds[i]['kind_maxNumBook'] = book
-                if kinds[i]['kind_minNumBook'] == None:
+                if kinds[i]['kind_minNumBook'] is None:
                     kinds[i]['kind_minNumBook'] = book
                 else:
                     if book.sales < kinds[i]['kind_minNumBook'].sales:
                         kinds[i]['kind_minNumBook'] = book
                 break
 
+    # 总体信息
+    all_stat = {
+        'all_sale': 0,  # 总销售额
+        'all_num': 0,  # 总销售量
+        'all_maxSaleKind': None,  # 销售额最多的类
+        'all_minSaleKind': None  # 销售额最少的类
+    }
     for kind in kinds:
         all_stat['all_sale'] += kind['kind_sale']
         all_stat['all_num'] += kind['kind_num']
 
-        if all_stat['all_maxSaleKind'] == None:
+        if all_stat['all_maxSaleKind'] is None:
             all_stat['all_maxSaleKind'] = kind
         else:
             if kind['kind_sale'] > all_stat['all_maxSaleKind']['kind_sale']:
                 all_stat['all_maxSaleKind'] = kind
 
-        if all_stat['all_minSaleKind'] == None:
+        if all_stat['all_minSaleKind'] is None:
             all_stat['all_minSaleKind'] = kind
         else:
             if kind['kind_sale'] < all_stat['all_minSaleKind']['kind_sale']:
@@ -545,9 +563,9 @@ def statistic(request):
 
     return render(request, 'user/super/statistic.html', {"books": allList, "kinds": kinds, "all_stat": all_stat})
 
-from order.models import Order
-from user.models import User
-def super_order(request, pageid):
+
+def super_order(request, pageid: int):
+    """查看订单信息"""
     orderList = Order.objects.filter(status=1)
     paginator = Paginator(orderList, 20)
     if pageid in paginator.page_range:
@@ -556,12 +574,14 @@ def super_order(request, pageid):
         userList = []
         for order in page.object_list:
             user = User.objects.get(user_id=order.user_id)
-            userList.append({"username":user.user_name, "address":user.address ,"orderid":order.order_id})
-        return render(request, 'user/super/order.html', {"orders":page, "num":num, "userList":userList})
+            userList.append({"username": user.user_name, "address": user.address, "orderid": order.order_id})
+        return render(request, 'user/super/order.html', {"orders": page, "num": num, "userList": userList})
     else:
         return HttpResponseRedirect("/user/super/order/1/")
 
-def super_orderSta(request, orderid):
+
+def super_orderSta(request, orderid: int) -> HttpResponseRedirect:
+    """订单发货，订单状态值加1"""
     ret = HttpResponseRedirect("/user/super/order/1/")
     ret.set_cookie("orderid", orderid)
     try:

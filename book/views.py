@@ -1,19 +1,16 @@
-from django.http import JsonResponse
 from django.shortcuts import render
 from user.models import Cart
-from book.models import Book
 from django.http import HttpResponse, JsonResponse
 from .models import Book
 from django.db.models import Q
-import datetime
-
 from bookstore.views import login_needful_json_res_0_errmsg
 
-
+import datetime
 # Create your views here.
 
 
-def detail(request, book_id):
+def detail(request, book_id: int) -> HttpResponse:
+    """书籍详细信息"""
     try:
         book = Book.objects.get(pk=book_id)
     except Book.DoesNotExist:
@@ -37,7 +34,8 @@ def detail(request, book_id):
     return render(request, 'book/detail.html', {'book': book_detail})
 
 
-def kind(request, kind_id):
+def kind(request, kind_id: int) -> HttpResponse:
+    """某种类号书籍页面"""
     bookList = Book.objects.filter(kind_id=kind_id)
     if len(bookList) == 0:
         return HttpResponse("你所访问的页面不存在", status=404)
@@ -60,7 +58,8 @@ def kind(request, kind_id):
     return render(request, 'book/kind.html', {'books': books, 'kind_name': kind_name})
 
 
-def search(request):
+def search(request) -> HttpResponse:
+    """书籍搜索，在书名、作者和出版社中搜索"""
     keyword = request.POST.get('keyword')
     bookList = Book.objects.filter(
         Q(book_name__contains=keyword) | Q(author__contains=keyword) | Q(press__contains=keyword)) \
@@ -83,9 +82,9 @@ def search(request):
     return render(request, 'book/search.html', {'books': books})
 
 
-# 用户将number本书加入购物车（缺省1本）
 @login_needful_json_res_0_errmsg
-def buy(request):
+def buy(request) -> JsonResponse:
+    """用户将number本书加入购物车（缺省1本）"""
     if request.method == 'POST':
         return JsonResponse({'res': 0, 'errmsg': '访问方式错误'})
 
@@ -96,10 +95,6 @@ def buy(request):
     except ValueError:
         # 商品数目不合法
         return JsonResponse({'res': 0, 'errmsg': '商品数量必须为数字'})
-    print(book_id)
-    print(type(book_id))
-    print(number)
-    print(type(number))
     # 检查数据不为空
     if not all([book_id, number]):
         return JsonResponse({'res': 0, 'errmsg': '数据不完整'})
@@ -131,9 +126,9 @@ def buy(request):
     return JsonResponse({'res': 1, 'msg': '您成功添加了' + str(number) + '本' + str(book.book_name)})
 
 
-# 删除用户购物车中商品的信息
 @login_needful_json_res_0_errmsg
-def cancel(request):
+def cancel(request) -> JsonResponse:
+    """删除用户购物车中商品"""
     try:
         book_id = int(request.GET.get('book_id'))
     except ValueError:
@@ -148,14 +143,14 @@ def cancel(request):
         # 购物车表中出现多次
         raise Exception('购物车中同一商品出现多次')
     else:
-        # 之前存在,数量+1
+        # 之前存在
         now.delete()
     return JsonResponse({'res': 1})
 
 
-# 购物车书数量设置为
 @login_needful_json_res_0_errmsg
-def set_number(request):
+def set_number(request) -> JsonResponse:
+    """设置购物车书数量"""
     try:
         book_id = int(request.GET.get('book_id'))
         number = int(request.GET.get('number'))
@@ -196,9 +191,9 @@ def set_number(request):
     return JsonResponse({'res': 1})
 
 
-# 购物车书选中状态反转
 @login_needful_json_res_0_errmsg
 def select(request):
+    """购物车书选中状态反转"""
     try:
         book_id = int(request.GET.get('book_id'))
     except ValueError:
@@ -218,12 +213,14 @@ def select(request):
 
 @login_needful_json_res_0_errmsg
 def count(request):
+    """购物车商品种类数"""
     cart_list = Cart.objects.filter(user_id=request.session['user']['user_id'])
     return JsonResponse({'res': len(cart_list)})
 
 
 @login_needful_json_res_0_errmsg
 def select_count(request):
+    """购物车已选中商品总个数"""
     count = 0
     for cart in Cart.objects.filter(user_id=request.session['user']['user_id'], select=True):
         count += cart.number

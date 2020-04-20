@@ -9,11 +9,9 @@ class Order(models.Model):
 
     order_id = models.AutoField(primary_key=True)
     user_id = models.IntegerField()
-    # date = models.CharField(max_length=10)  # 2020-03-17
-    # time = models.CharField(max_length=5)  # 16:11
     sum_price = models.FloatField()
     # 订单状态：已取消 0， 待付款 1， 待发货 2， 已发货 3， 已完成 4
-    status = models.IntegerField()  # TODO IntegerField ?
+    status = models.IntegerField()
     time_submit = models.DateTimeField()
     time_pay = models.DateTimeField(null=True)
     time_finish = models.DateTimeField(null=True)

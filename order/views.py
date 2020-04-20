@@ -22,7 +22,8 @@ from bookstore.views import login_needful, login_needful_json_res_0_errmsg
 
 
 @login_needful
-def all(request):
+def all(request) -> HttpResponse:
+    """用户的所有信息"""
     user_id = request.session['user']['user_id']
 
     # 更新待支付订单状态
@@ -60,6 +61,7 @@ def all(request):
 
 @login_needful
 def detail(request, order_id: int):
+    """订单详情 TODO 只能查看自己的订单"""
     content = {}
     # 订单本身的信息
     try:
@@ -111,9 +113,9 @@ def detail(request, order_id: int):
     return render(request, 'order/detail.html', content)
 
 
-# 创建订单
 @login_needful
 def new(request):
+    """创建订单，以购物车中选中的商品"""
     order = Order(
         # order_id =
         user_id=request.session['user']['user_id'],
@@ -125,8 +127,6 @@ def new(request):
         # time_finish=None,
     )
     order.save()
-
-    # print(order.order_id)
 
     sum_price = 0.0
     for book in Cart.objects.filter(
@@ -146,13 +146,12 @@ def new(request):
         select=True,
     ).delete()
     # 重定向展示实际的网址
-    print(order.order_id)
     return redirect("/order/detail/%d" % order.order_id)
 
 
-# 立即购买
 @login_needful_json_res_0_errmsg
-def buynow(request):
+def buynow(request) -> JsonResponse:
+    """立即购买，以给定数量当前商品创建订单"""
     try:
         book_id = int(request.GET.get('book_id'))
         number = int(request.GET.get('number', 1))
@@ -180,7 +179,8 @@ def buynow(request):
 
 
 @login_needful_json_res_0_errmsg
-def receive(request):
+def receive(request) -> JsonResponse:
+    """订单收货 TODO 仅限自己的订单"""
     try:
         order_id = int(request.GET.get('order_id'))
     except ValueError:
@@ -211,11 +211,13 @@ alipayClient = AliPay(
 )
 
 
-def build_trade_no(order_id: int, datetime):
-    return (str(order_id) + '__%s' % datetime).split('.')[0].replace(' ', '_').replace('-', '_').replace(':', '_')
+def build_trade_no(order_id: int, date_time: datetime):
+    """以订单号和日期时间构造支付宝订单号"""
+    return (str(order_id) + '__%s' % date_time).split('.')[0].replace(' ', '_').replace('-', '_').replace(':', '_')
 
 
 def alipay_pay(request):
+    """获取支付宝支付二维码 TODO 限用户个人"""
     global alipayClient
 
     order_id = request.GET.get('order_id')
@@ -265,8 +267,8 @@ def alipay_pay(request):
     return HttpResponse(buf.getvalue(), 'image/png')
 
 
-# 未处理未扫码但长时间未支付的情况
 def alipay_query(out_trade_no: str):
+    """查询支付宝未付款订单最新状态"""
     global alipayClient
     try:
         result = alipayClient.api_alipay_trade_query(out_trade_no=out_trade_no)
@@ -311,8 +313,8 @@ def alipay_query(out_trade_no: str):
             return {'res': 1, 'status': 0}
 
 
-# 订单状态更新
-def order_status_update(order: Order):
+def order_status_update(order: Order) -> None:
+    """尝试更新未付款订单状态"""
     # 待付款订单可能已经付款
     if order.status == 1:
         # 订单提交30分钟未支付即自动取消
