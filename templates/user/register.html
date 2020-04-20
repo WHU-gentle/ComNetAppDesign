@@ -24,11 +24,11 @@
                 // 邮箱地址错误 {'res':0}
                 // 发送成功 {'res':1}
                 if (data.res == 0){
-                    $('input[name="email"]').next().html(data.errmsg).show()
+                    alert(data.errmsg)
                 }
                 else
                 {
-                    $('input[name="email"]').next().html('验证邮件已发送').show()
+                    alert('验证邮件已发送')
                 }
             })
         })

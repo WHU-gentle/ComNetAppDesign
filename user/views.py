@@ -32,6 +32,18 @@ def login(request):
     return render(request, 'user/login.html', context)
 
 
+def user_session_login(request, user: User):
+    request.session['islogin'] = True
+    request.session['user'] = {
+        'user_id': user.user_id,
+        'user_name': user.user_name,
+        'phone_number': user.phone_number,
+        'address': user.address,
+        'email': user.email,
+        'register_date': user.register_date.strftime("%Y-%m-%d %H:%M:%S"),
+    }
+
+
 def login_check(request):
     '''进行用户登录校验'''
     # 1.获取数据
@@ -72,15 +84,7 @@ def login_check(request):
         jres.delete_cookie('user_name')
 
     # 记住用户的登录状态
-    request.session['islogin'] = True
-    request.session['user'] = {
-        'user_id': user.user_id,
-        'user_name': user.user_name,
-        'phone_number': user.phone_number,
-        'address': user.address,
-        'email': user.email,
-        'register_date': user.register_date.strftime("%Y-%m-%d %H:%M:%S"),
-    }
+    user_session_login(request, user)
     cache_clean()
     return jres
 
@@ -197,58 +201,60 @@ def result(request):
                     phone_number=phone_number, address=address,
                     email=email, register_date=datetime.datetime.now())
         user.save()
-        return render(request, 'user/result.html', {'message': '注册成功！', 'user_name': request.POST['user_name']})
+        user_session_login(request, user)
+        # 重定向到首页
+        return redirect(reverse('index'), permanent=True)
     else:
         return render(request, 'user/result.html',
                       {'error_message': res['error_message'], 'error_status': res['error_status']})
 
-
-def register_update(request):
-    if request.method != 'POST':
-        return JsonResponse({'res': 0, 'error_message': '访问方式错误'})
-    user_name = request.POST.get('user_name')
-    old_password = request.POST.get('old_password')
-    password = request.POST.get('password')
-    repeat_password = request.POST.get('repeat_password')
-    phone_number = request.POST.get('phone_number')
-    address = request.POST.get('address')
-    email = request.POST.get('email')
-    verify_email_code = request.POST.get('verify_email_code')
-
-    res = register_check(user_name, password, repeat_password, phone_number, address,
-                         email, request.session.get('verify_email_address'),
-                         verify_email_code, request.session.get('verify_email_code'))
-
-    try:
-        me = User.objects.get(user_id=request.session['user']['user_id'])
-    except User.DoesNotExist:
-        return JsonResponse({'res': 0, 'errmsg': '用户不存在'})
-    except User.MultipleObjectsReturned:
-        raise Exception('用户同一id出现多次')
-    if me.password != old_password:
-        return JsonResponse({'res': 0, 'errmsg': '密码错误'})
-
-    request.session['user'] = {
-        'user_id': request.session['user']['user_id'],
-        'user_name': user_name,
-        'phone_number': phone_number,
-        'address': address,
-        'email': email,
-        'register_date': request.session['user']['register_date'],
-    }
-
-    if res['res'] == 1:
-        User.objects.filter(user_id=request.session['user']['user_id']).update(
-            user_name=user_name,
-            password=password,
-            phone_number=phone_number,
-            address=address,
-            email=email,
-        )
-        return JsonResponse({'res': 1})
-    else:
-        # TODO 有一个报错Expected type 'Iterable[str]', got 'int' instead ??
-        return JsonResponse({'res': 0, 'errmsg': '\n'.join(res['error_message'])})
+#
+# def register_update(request):
+#     if request.method != 'POST':
+#         return JsonResponse({'res': 0, 'error_message': '访问方式错误'})
+#     user_name = request.POST.get('user_name')
+#     old_password = request.POST.get('old_password')
+#     password = request.POST.get('password')
+#     repeat_password = request.POST.get('repeat_password')
+#     phone_number = request.POST.get('phone_number')
+#     address = request.POST.get('address')
+#     email = request.POST.get('email')
+#     verify_email_code = request.POST.get('verify_email_code')
+#
+#     res = register_check(user_name, password, repeat_password, phone_number, address,
+#                          email, request.session.get('verify_email_address'),
+#                          verify_email_code, request.session.get('verify_email_code'))
+#
+#     try:
+#         me = User.objects.get(user_id=request.session['user']['user_id'])
+#     except User.DoesNotExist:
+#         return JsonResponse({'res': 0, 'errmsg': '用户不存在'})
+#     except User.MultipleObjectsReturned:
+#         raise Exception('用户同一id出现多次')
+#     if me.password != old_password:
+#         return JsonResponse({'res': 0, 'errmsg': '密码错误'})
+#
+#     request.session['user'] = {
+#         'user_id': request.session['user']['user_id'],
+#         'user_name': user_name,
+#         'phone_number': phone_number,
+#         'address': address,
+#         'email': email,
+#         'register_date': request.session['user']['register_date'],
+#     }
+#
+#     if res['res'] == 1:
+#         User.objects.filter(user_id=request.session['user']['user_id']).update(
+#             user_name=user_name,
+#             password=password,
+#             phone_number=phone_number,
+#             address=address,
+#             email=email,
+#         )
+#         return JsonResponse({'res': 1})
+#     else:
+#         # TODO 有一个报错Expected type 'Iterable[str]', got 'int' instead ??
+#         return JsonResponse({'res': 0, 'errmsg': '\n'.join(res['error_message'])})
 
 
 def cart(request):

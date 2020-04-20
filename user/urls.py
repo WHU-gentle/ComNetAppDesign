@@ -16,7 +16,7 @@ urlpatterns = [
     path('verifycode/', views.verifycode, name="verifycode"),
     path('verifyemail/', views.verifyemail, name="verifyemail"),
     path('login_check/', views.login_check, name="login_check"),
-    path('register_update/', views.register_update, name="register_update"),
+    # path('register_update/', views.register_update, name="register_update"),
 
     #关于统计信息的超级用户的url
     path('super/', views.super_host, name="super_host"),

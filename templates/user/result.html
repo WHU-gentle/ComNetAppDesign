@@ -4,11 +4,5 @@
 {% block topfiles %}
 {% endblock topfiles %}
 {% block body %}
-    {% if error_message %}
-        <p><strong>{{ error_message }}</strong></p>
-    {% else %}
-        {{ message }} <br>
-        欢迎！{{ user_name }} <br>
-        <a href="{% url 'user:login' %}">登录</a>
-    {% endif %}
+    <p><strong>{{ error_message }}</strong></p>
 {% endblock body %}
