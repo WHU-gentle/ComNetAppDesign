@@ -65,7 +65,7 @@ pyquery==1.4.1
 pyspider==0.3.10
 python-alipay-sdk==2.0.1
 pytz==2017.2
-PyYAML==5.3
+PyYAML==5.4
 queuelib==1.5.0
 redis==2.10.6
 requests==2.22.0
