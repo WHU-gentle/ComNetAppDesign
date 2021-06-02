@@ -84,7 +84,7 @@ tblib==1.6.0
 tornado==4.5.3
 Twisted==19.10.0
 u-msgpack-python==2.5.2
-urllib3==1.23
+urllib3==1.26.5
 utils==1.0.1
 vine==1.1.4
 virtualenv==16.7.8
